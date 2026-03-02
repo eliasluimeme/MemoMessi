@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  # frontend:
+  #   build:
+  #     context: ./front
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   env_file:
+  #     - ./front/.env
+  #   volumes:
+  #     - ./front/src:/src/src
+  #   depends_on:
+  #     - backend
+
+  database:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: mng
+    ports:
+      - '5432:5432'
+      - '5555:5555'

@@ -1,0 +1,51 @@
+import { SignalWithTargets } from '@/types/signal';
+import { prisma } from '@/lib/prisma';
+import SignalCard from './signal-card-compact';
+import { Button } from './ui/button';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+
+export async function SignalFeed() {
+    const latestSignals = await prisma.signal.findMany({
+        take: 3,
+        orderBy: {
+            createdAt: 'desc',
+        },
+        include: {
+            targets: {
+                orderBy: {
+                    number: 'asc',
+                },
+            },
+            favorites: true,
+        },
+    });
+
+    return (
+        <div className="space-y-8">
+            <div className="flex items-center justify-between border-b border-white/[0.03] pb-6">
+                <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-primary" />
+                    <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40">Latest Alpha</h2>
+                </div>
+                <Button variant="ghost" size="sm" asChild className="hover:bg-white/[0.02] rounded-full">
+                    <Link href="/signals" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 hover:text-primary transition-all group">
+                        Live Stream <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                </Button>
+            </div>
+            <div className="flex flex-col gap-6">
+                {latestSignals.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-white/[0.01] rounded-[32px] border border-dashed border-white/[0.05]">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/20">No active signals detected</span>
+                    </div>
+                ) : (
+                    latestSignals.map((signal) => (
+                        //@ts-ignore
+                        <SignalCard key={signal.id} signal={signal} />
+                    ))
+                )}
+            </div>
+        </div>
+    );
+}

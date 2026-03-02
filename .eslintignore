@@ -1,0 +1,7 @@
+next.config.mjs
+
+/node_modules
+/dist
+/public
+/src/prisma
+/src/prisma/migrations

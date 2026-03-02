@@ -1,0 +1,11 @@
+
+
+TODO: create a chat page for the admin/user.
+
+
+TODO: add subscription verification and update access for users
+TODO: add a page for the user to update their subscription plan
+TODO: add loading state to user pages
+TODO: store jwt in db and check against it
+
+DONE:check if we update the subscription status and expiresAt. in the login page 
