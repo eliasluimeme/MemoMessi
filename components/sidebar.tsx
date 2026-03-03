@@ -52,9 +52,9 @@ export default function Sidebar({ items }: { items: SidebarItem[] }) {
               className="group-data-[collapsible=icon]:px-0"
             >
               <Link href="/dashboard" onClick={handleItemClick} className="flex items-center gap-4">
-                <div className="relative h-10 w-10 flex-shrink-0">
+                <div className="relative h-12 w-12 flex-shrink-0">
                   {/* <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-50" /> */}
-                  <Image src="/logo.png" alt="MemoMessi" width={90} height={90} className="relative z-10 rounded-xl" />
+                  <Image src="/logo.png" alt="MemoMessi" width={120} height={120} className="relative z-10 rounded-xl" />
                 </div>
                 <div className="flex flex-col group-data-[collapsible=icon]:hidden space-y-1">
                   <span className="text-[11px] font-black tracking-[0.4em] uppercase leading-none text-foreground">MemoMessi</span>
