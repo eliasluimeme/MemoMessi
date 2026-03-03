@@ -18,7 +18,7 @@ export default function CurrentPrice({ token, className }: CurrentPriceProps) {
     const fetchPrice = async () => {
       try {
         const response = await fetch(
-          `https://api.binance.com/api/v3/ticker/price?symbol=${token.toUpperCase()}USDT`,
+          `/api/price/${token.toUpperCase()}`,
         );
         const data = await response.json();
         setPrice(parseFloat(data.price).toFixed(4));

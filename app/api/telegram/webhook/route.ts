@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   console.log(`[${requestId}] 🚀 Webhook request received`);
   
   try {
-    const headersList = headers();
+    const headersList = await headers();
     const secretToken = headersList.get('x-telegram-bot-api-secret-token');
     
     // Log headers in development

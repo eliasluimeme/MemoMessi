@@ -2,16 +2,16 @@ import { createClient, createAdminClient } from '@/lib/supabase';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
-export async function PATCH(req: Request, { params }: { params: { userId: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ userId: string }> }) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !currentUser || currentUser.user_metadata.role !== 'ADMIN') {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
-    const { userId } = params;
+    const { userId } = await params;
     const body = await req.json();
     const { fullName, email, phoneNumber, password, expiresAt } = body;
 

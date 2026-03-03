@@ -19,7 +19,7 @@ const updateSignalSchema = z.object({
 });
 
 async function checkAdmin() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return null;
   const role = user.user_metadata.role || 'USER';
@@ -27,14 +27,15 @@ async function checkAdmin() {
   return user;
 }
 
-export async function DELETE(req: Request, { params }: { params: { signalId: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ signalId: string }> }) {
   try {
     if (!await checkAdmin()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { signalId } = await params;
     await prisma.signal.delete({
-      where: { id: params.signalId },
+      where: { id: signalId },
     });
 
     return NextResponse.json({ message: 'Signal deleted successfully' });
@@ -44,17 +45,18 @@ export async function DELETE(req: Request, { params }: { params: { signalId: str
   }
 }
 
-export async function PATCH(req: Request, { params }: { params: { signalId: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ signalId: string }> }) {
   try {
     if (!await checkAdmin()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { signalId } = await params;
     const body = await req.json();
     const validatedData = updateSignalSchema.parse(body);
 
     const updatedSignal = await prisma.signal.update({
-      where: { id: params.signalId },
+      where: { id: signalId },
       data: {
         pair: validatedData.pair,
         market: validatedData.market,
@@ -87,12 +89,13 @@ export async function PATCH(req: Request, { params }: { params: { signalId: stri
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { signalId: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ signalId: string }> }) {
   try {
     if (!await checkAdmin()) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { signalId } = await params;
     const body = await req.json();
     const { status } = body;
 
@@ -101,7 +104,7 @@ export async function PUT(req: Request, { params }: { params: { signalId: string
     }
 
     const updatedSignal = await prisma.signal.update({
-      where: { id: params.signalId },
+      where: { id: signalId },
       data: {
         status,
         isClosed: true,

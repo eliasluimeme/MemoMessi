@@ -21,6 +21,9 @@ const config: Config = {
       },
     },
     extend: {
+      transitionTimingFunction: {
+        'quart-out': 'cubic-bezier(0.23, 1, 0.32, 1)',
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -124,6 +127,9 @@ const config: Config = {
           '0%, 100%': { transform: 'translate(0, 0)' },
           '50%': { transform: 'translate(50px, -100px)' },
         },
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -137,6 +143,7 @@ const config: Config = {
         particle1: 'particle1 4s ease-in-out infinite',
         particle2: 'particle2 5s ease-in-out infinite',
         particle3: 'particle3 6s ease-in-out infinite',
+        shimmer: 'shimmer 1.8s infinite',
       },
     },
   },

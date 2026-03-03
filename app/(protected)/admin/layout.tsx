@@ -34,8 +34,8 @@ const items: SidebarItem[] = [
   },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = cookies();
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get('sidebar:state')?.value === 'true';
 
   return (

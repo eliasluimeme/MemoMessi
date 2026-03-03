@@ -132,20 +132,20 @@ export function ContentView({ signals }: { signals: SignalWithTargets[] }) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-12 pb-16">
           <div className="relative w-full md:max-w-2xl group">
             <div className="absolute inset-0 bg-white/[0.01] blur-2xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-1000" />
-            <Search className="absolute left-6 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/20 group-focus-within:text-primary group-focus-within:scale-110 transition-all duration-700 z-10" />
+            <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 dark:text-muted-foreground/20 text-muted-foreground/50 group-focus-within:text-primary group-focus-within:scale-110 transition-all duration-700 z-10" />
             <Input
-              placeholder="Search Intelligence Database..."
-              className="relative z-0 pl-16 h-16 rounded-full border border-white/[0.02] bg-white/[0.01] hover:bg-white/[0.02] text-xl font-black tracking-[-0.03em] text-foreground placeholder:text-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-white/[0.05] focus-visible:border-white/[0.05] transition-all duration-700"
+              placeholder="Search signals..."
+              className="relative z-0 pl-12 h-12 rounded-full border dark:border-white/[0.02] border-border/70 dark:bg-white/[0.01] bg-background dark:hover:bg-white/[0.02] hover:bg-muted/30 text-sm font-semibold tracking-[-0.01em] text-foreground dark:placeholder:text-muted-foreground/20 placeholder:text-muted-foreground/60 focus-visible:ring-1 dark:focus-visible:ring-white/[0.05] focus-visible:ring-primary/20 dark:focus-visible:border-white/[0.05] focus-visible:border-primary/30 transition-all duration-700"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="flex items-center gap-12">
             <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-              <SelectTrigger className="w-auto h-12 px-6 rounded-full border border-white/[0.02] bg-white/[0.01] gap-3 text-micro text-muted-foreground/30 hover:border-white/[0.08] hover:text-foreground hover:bg-white/[0.03] transition-all duration-700">
+              <SelectTrigger className="w-auto h-12 px-6 rounded-full border dark:border-white/[0.02] border-border/70 dark:bg-white/[0.01] bg-background gap-3 text-micro dark:text-muted-foreground/30 text-muted-foreground/70 dark:hover:border-white/[0.08] hover:border-border hover:text-foreground dark:hover:bg-white/[0.03] hover:bg-muted/30 transition-all duration-700">
                 <SelectValue placeholder="Sequence" />
               </SelectTrigger>
-              <SelectContent className="rounded-3xl border border-white/[0.05] bg-background/80 backdrop-blur-3xl p-3">
+              <SelectContent className="rounded-3xl border dark:border-white/[0.05] border-border/60 bg-background/90 backdrop-blur-3xl p-3">
                 <SelectGroup>
                   <SelectItem value="newest" className="rounded-2xl text-micro px-4 py-3 cursor-pointer">Recency Order</SelectItem>
                   <SelectItem value="oldest" className="rounded-2xl text-micro px-4 py-3 cursor-pointer">Legacy Order</SelectItem>
@@ -155,7 +155,7 @@ export function ContentView({ signals }: { signals: SignalWithTargets[] }) {
               </SelectContent>
             </Select>
 
-            <div className="h-4 w-[1px] bg-white/[0.05]" />
+            <div className="h-4 w-[1px] dark:bg-white/[0.05] bg-border" />
 
             <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide py-2">
               {['ALL', 'SPOT', 'WITHIN_ENTRY_ZONE', 'CLOSED'].map((filter) => (
@@ -166,7 +166,7 @@ export function ContentView({ signals }: { signals: SignalWithTargets[] }) {
                     "relative overflow-hidden px-8 h-12 rounded-full text-micro transition-all duration-1000 border group/btn flex items-center justify-center",
                     (activeFilters[0] || 'ALL') === filter
                       ? "bg-primary/5 text-primary border-primary/20"
-                      : "bg-white/[0.01] text-muted-foreground/30 border-white/[0.02] hover:border-white/[0.08] hover:bg-white/[0.03] hover:text-foreground"
+                      : "dark:bg-white/[0.01] bg-background dark:text-muted-foreground/30 text-muted-foreground/70 dark:border-white/[0.02] border-border/60 dark:hover:border-white/[0.08] hover:border-border hover:bg-muted/30 hover:text-foreground"
                   )}
                 >
                   <span className="relative z-10">{filter.replace(/_/g, ' ')}</span>

@@ -15,15 +15,15 @@ export function TokenImage({ token, className, variant = 'md' }: TokenImageProps
 
   return (
     <Avatar
-      className={cn(
-        'bg-transparent ring-1 ring-white/10',
-        {
-          'h-6 w-6': variant === 'sm',
-          'h-8 w-8': variant === 'md',
-          'h-12 w-12': variant === 'lg',
-        },
-        className,
-      )}
+      // className={cn(
+      //   'bg-transparent ring-1 ring-white/10',
+      //   {
+      //     'h-6 w-6': variant === 'sm',
+      //     'h-8 w-8': variant === 'md',
+      //     'h-12 w-12': variant === 'lg',
+      //   },
+      //   className,
+      // )}
     >
       <AvatarImage
         src={imageUrl}

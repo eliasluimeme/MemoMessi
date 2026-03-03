@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { createClient } from './supabase';
 import { prisma } from './prisma';
 
@@ -7,8 +8,8 @@ export async function isAuthenticated() {
   return session;
 }
 
-export const getSession = async () => {
-  const supabase = createClient();
+export const getSession = cache(async () => {
+  const supabase = await createClient();
 
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -42,4 +43,4 @@ export const getSession = async () => {
     console.error('Error fetching user:', error);
     return null;
   }
-};
+});

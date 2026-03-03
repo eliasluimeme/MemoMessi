@@ -121,7 +121,7 @@
   }
 
   .glass-border {
-    @apply border border-white/[0.03] bg-white/[0.01];
+    @apply border dark:border-white/[0.03] border-border/40 dark:bg-white/[0.01] bg-background/60;
   }
 
   .glass-card {
@@ -157,10 +157,18 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(128, 128, 128, 0.2);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(128, 128, 128, 0.35);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
 }

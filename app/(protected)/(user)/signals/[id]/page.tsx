@@ -44,8 +44,9 @@ async function getSignal(id: string): Promise<SignalWithTargets | null> {
   });
 }
 
-export default async function SignalPage({ params }: { params: { id: string } }) {
-  const signal = await getSignal(params.id);
+export default async function SignalPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const signal = await getSignal(id);
   if (!signal) notFound();
 
   const isSolana = signal.network === 'solana';

@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server';
 // TODO: this file might be removed
 export async function GET() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
     if (!token) {

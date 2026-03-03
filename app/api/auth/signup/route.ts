@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // 1. Create User in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({

@@ -27,7 +27,7 @@ const USER_ROUTES = ['/dashboard', '/signals', '/settings', '/profile', '/favori
 const ADMIN_ROUTES = ['/admin', '/admin/signals', '/admin/subscriptions', '/admin/users', '/admin/telegram'];
 const PROTECTED_ROUTES = [...USER_ROUTES, ...ADMIN_ROUTES];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,

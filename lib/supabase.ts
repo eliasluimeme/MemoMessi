@@ -9,8 +9,8 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
 // Client for Server Components/Actions/Middleware
-export function createClient() {
-    const cookieStore = cookies()
+export async function createClient() {
+    const cookieStore = await cookies()
 
     return createServerClient(
         supabaseUrl,

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 async function checkAdmin() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
 
   if (error || !user) return null;

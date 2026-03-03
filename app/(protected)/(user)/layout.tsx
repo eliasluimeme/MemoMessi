@@ -26,18 +26,18 @@ const items: SidebarItem[] = [
     path: '/favorites',
     notifCount: 0,
     activeColor: ' fill-current text-yellow-500',
-  },
-  {
-    iconName: 'BookOpenText',
-    label: 'Academy',
-    path: '/academy',
-    notifCount: 0,
-    activeColor: 'stroke-emerald-500',
-  },
+  }
+  // {
+  //   iconName: 'BookOpenText',
+  //   label: 'Academy',
+  //   path: '/academy',
+  //   notifCount: 0,
+  //   activeColor: 'stroke-emerald-500',
+  // },
 ];
 
-export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = cookies();
+export default async function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get('sidebar:state')?.value === 'true';
 
   return (

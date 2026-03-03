@@ -5,7 +5,7 @@ import { Plan } from '@prisma/client';
 
 export async function PATCH(req: Request) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user || user.user_metadata.role !== 'ADMIN') {

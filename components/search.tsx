@@ -104,12 +104,12 @@ export function Search() {
     <>
       <div className="relative hidden w-full max-w-[440px] md:block group">
         <div className="relative flex items-center">
-          <SearchIcon className="absolute left-4 h-4 w-4 shrink-0 text-muted-foreground/30 group-focus-within:text-primary transition-colors duration-500" />
+          <SearchIcon className="absolute left-3 h-4 w-4 shrink-0 text-muted-foreground/30 group-focus-within:text-primary transition-colors duration-500" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-10 pl-11 text-[13px] font-medium rounded-2xl border-white/[0.03] bg-white/[0.02] backdrop-blur-3xl focus:bg-white/[0.04] focus:ring-primary/20 transition-all duration-500 placeholder:text-muted-foreground/20"
-            placeholder="Search terminal assets..."
+            className="h-10 pl-9 text-[13px] font-medium rounded-2xl border-white/[0.03] bg-white/[0.02] backdrop-blur-3xl focus:bg-white/[0.04] focus:ring-primary/20 transition-all duration-500 placeholder:text-muted-foreground/20"
+            placeholder="Search signals..."
           />
           <div className="absolute right-4 flex items-center gap-1.5 pointer-events-none opacity-20 group-focus-within:opacity-0 transition-opacity">
             <kbd className="px-1.5 py-0.5 rounded-md border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-tighter">⌘</kbd>

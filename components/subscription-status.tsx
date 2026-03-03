@@ -19,7 +19,7 @@ const plan: Record<PlanType, string> = {
 } as const;
 
 export async function SubscriptionStatus() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 
   if (!token) {

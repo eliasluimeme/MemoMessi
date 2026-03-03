@@ -2,55 +2,94 @@
 
 import Link from 'next/link';
 import { SignalWithTargets } from '@/types/signal';
-import { Clock, Zap } from 'lucide-react';
+import { Clock, TrendingUp, TrendingDown } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { TokenImage } from '@/components/token-image';
+
+const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
+    WITHIN_ENTRY_ZONE: { label: 'In Entry Zone', color: 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30', dot: 'bg-emerald-400 animate-pulse' },
+    CLOSED:            { label: 'Closed',        color: 'text-white/25 bg-white/[0.03] border-white/[0.06]',        dot: 'bg-white/25' },
+    TP1:               { label: 'TP1 Hit',       color: 'text-sky-300 bg-sky-500/10 border-sky-500/25',             dot: 'bg-sky-400' },
+    TP2:               { label: 'TP2 Hit',       color: 'text-sky-300 bg-sky-500/10 border-sky-500/25',             dot: 'bg-sky-400' },
+    TP3:               { label: 'TP3 Hit',       color: 'text-violet-300 bg-violet-500/10 border-violet-500/25',    dot: 'bg-violet-400' },
+};
+const getStatus = (s: string) =>
+    statusConfig[s] ?? { label: s.replace(/_/g, ' '), color: 'text-white/25 bg-white/[0.03] border-white/[0.06]', dot: 'bg-white/25' };
 
 export default function SignalCardCompact({ signal }: { signal: SignalWithTargets }) {
-    return (
-        <Link href={`/signals/${signal.id}`} className="group block">
-            <div className="relative overflow-hidden rounded-[24px] border border-white/[0.02] bg-white/[0.01] p-8 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-white/[0.05] hover:bg-white/[0.02] hover:-translate-y-1">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-5">
-                        <div className="h-14 w-14 rounded-[20px] bg-primary/5 border border-primary/10 flex items-center justify-center group-hover:bg-primary/10 transition-colors duration-700">
-                            <Zap className="h-7 w-7 text-primary fill-primary/10" />
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-2xl font-black tracking-[-0.05em] text-foreground group-hover:text-primary transition-colors duration-700 leading-none">
-                                {signal.pair}
-                            </h3>
-                            <p className="text-micro text-muted-foreground/20 group-hover:text-muted-foreground/40 transition-colors duration-700">
-                                {signal.network || 'Solana'} • {signal.market}
-                            </p>
-                        </div>
-                    </div>
+    const base       = signal.pair.split('/')[0] ?? signal.pair;
+    const quote      = signal.pair.split('/')[1] ?? 'USDT';
+    const isBuy      = !signal.action || signal.action.toUpperCase() !== 'SELL';
+    const lastTarget = signal.targets[signal.targets.length - 1];
+    const hitsCount  = signal.targets.filter(t => t.hit).length;
+    const st         = getStatus(signal.status);
 
-                    <div className="flex flex-col items-end gap-2 text-right">
-                        <div className={cn(
-                            "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border transition-all duration-700",
-                            signal.status === 'WITHIN_ENTRY_ZONE'
-                                ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
-                                : "bg-white/[0.03] text-muted-foreground/20 border-white/[0.05]"
-                        )}>
-                            {signal.status.replace(/_/g, ' ')}
+    return (
+        <Link href={`/signals/${signal.id}`} className="group block h-full">
+            <div className="relative flex flex-col h-full rounded-2xl border border-white/[0.06] bg-[#0a0a0a] backdrop-blur-xl p-5 gap-4 transition-all duration-300 hover:border-white/[0.1] hover:-translate-y-0.5 overflow-hidden">
+
+                {/* Header */}
+                <div className="flex items-center gap-3">
+                    <TokenImage token={base} className="h-9 w-9 rounded-xl flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-1 leading-none">
+                            <span className="text-[15px] font-bold tracking-tight text-white truncate">{base}</span>
+                            <span className="text-[11px] text-white/20">/{quote}</span>
                         </div>
-                        <span className="text-micro text-muted-foreground/10 flex items-center gap-2 group-hover:text-muted-foreground/30 transition-colors">
-                            <Clock className="h-2 w-2" />
-                            {formatDistanceToNow(new Date(signal.createdAt))}
+                        <p className="text-[10px] text-white/30 mt-0.5">{signal.network ?? 'Solana'} · {signal.market}</p>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {isBuy
+                            ? <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+                            : <TrendingDown className="h-3.5 w-3.5 text-rose-400" />}
+                        <span className={cn('text-[10px] font-bold', isBuy ? 'text-emerald-400' : 'text-rose-400')}>
+                            {isBuy ? 'LONG' : 'SHORT'}
                         </span>
                     </div>
                 </div>
 
-                <div className="mt-8 grid grid-cols-2 gap-10 pt-8 border-t border-white/[0.02]">
-                    <div className="space-y-2">
-                        <span className="text-premium-label transition-colors duration-700 group-hover:text-muted-foreground/60">Entry Protocol</span>
-                        <p className="font-mono text-[14px] font-black text-foreground/70 leading-none group-hover:text-foreground transition-colors duration-700">${signal.entryZone}</p>
+                {/* Status badge */}
+                <div className={cn(
+                    'inline-flex self-start items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border',
+                    st.color
+                )}>
+                    <span className={cn('h-1.5 w-1.5 rounded-full', st.dot)} />
+                    {st.label}
+                </div>
+
+                {/* Prices */}
+                <div className="flex justify-between items-end border-t border-white/[0.04] pt-3">
+                    <div>
+                        <p className="text-[9px] uppercase tracking-widest text-white/20 mb-1.5">Entry</p>
+                        <p className="font-mono text-[15px] font-bold text-white/80 leading-none">${signal.entryZone}</p>
                     </div>
-                    <div className="space-y-2 text-right">
-                        <span className="text-premium-label transition-colors duration-700 group-hover:text-muted-foreground/60">Yield Objective</span>
-                        <p className="font-mono text-[14px] font-black text-emerald-500 leading-none group-hover:text-emerald-400 transition-colors duration-700">
-                            ${signal.targets[signal.targets.length - 1]?.price.toFixed(4).replace(/\.?0+$/, '')}
-                        </p>
+                    {lastTarget && (
+                        <div className="text-right">
+                            <p className="text-[9px] uppercase tracking-widest text-white/20 mb-1.5">Final Target</p>
+                            <p className="font-mono text-[15px] font-bold text-emerald-400 leading-none">
+                                ${lastTarget.price.toFixed(4).replace(/\.?0+$/, '')}
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Target progress */}
+                <div className="space-y-1.5 mt-auto">
+                    <div className="flex gap-1 h-1 w-full">
+                        {signal.targets.map((t, i) => (
+                            <div key={i} className={cn(
+                                'flex-1 h-full rounded-full transition-all duration-700',
+                                t.hit ? 'bg-emerald-400' : 'bg-white/[0.06]'
+                            )} style={{ transitionDelay: `${i * 60}ms` }} />
+                        ))}
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-white/20">{hitsCount}/{signal.targets.length} targets</span>
+                        <span className="flex items-center gap-1 text-[10px] text-white/20">
+                            <Clock className="h-2.5 w-2.5" />
+                            {formatDistanceToNow(new Date(signal.createdAt))} ago
+                        </span>
                     </div>
                 </div>
             </div>

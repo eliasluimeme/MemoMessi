@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   try {
     const { data: { user }, error } = await supabase.auth.getUser();

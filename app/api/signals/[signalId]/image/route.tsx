@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { signalId: string } }
+    { params }: { params: Promise<{ signalId: string }> }
 ) {
     try {
-        const id = params.signalId;
+        const { signalId: id } = await params;
 
         if (!id) {
             return new Response('Missing signal ID', { status: 400 });

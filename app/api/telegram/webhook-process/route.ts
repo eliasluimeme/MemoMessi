@@ -4,7 +4,7 @@ import { telegramService } from '@/lib/telegram';
 
 export async function POST(req: Request) {
   try {
-    const headersList = headers();
+    const headersList = await headers();
     const internalToken = headersList.get('x-internal-token');
 
     // Verify internal token
