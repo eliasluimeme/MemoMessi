@@ -23,34 +23,32 @@ const PricingCard = ({
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      className={`group relative w-full overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-b from-white/5 via-white/10 to-white/5 p-4 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-transparent hover:shadow-[0_0_30px_4px_rgba(59,130,246,0.1)] sm:p-6 md:w-[340px] lg:w-[300px] ${
-        isPopular ? 'border-blue-500/20' : ''
+      className={`group relative w-full overflow-hidden rounded-3xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-xl transition-all duration-500 hover:bg-white/[0.04] ${
+        isPopular ? 'border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.05)]' : ''
       }`}
     >
       {/* Glass Effects */}
-      <div className="absolute -inset-[1px] -z-10 rounded-3xl bg-gradient-to-b from-blue-500/10 via-blue-500/5 to-transparent opacity-0 blur-sm transition-all duration-500 group-hover:opacity-100" />
-      <div className="absolute -inset-[2px] -z-10 rounded-3xl bg-gradient-to-t from-blue-500/5 via-transparent to-blue-300/5" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/50 via-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
       {isPopular && (
-        <div className="absolute -right-12 top-6 rotate-45 bg-blue-500 px-12 py-1 text-xs font-medium text-white sm:top-8 sm:text-sm">
+        <div className="absolute -right-12 top-6 rotate-45 bg-white/10 border border-white/20 backdrop-blur-md px-12 py-1 text-xs font-medium text-white sm:top-8 sm:text-sm">
           Popular
         </div>
       )}
 
       <div className="mb-4 sm:mb-5">
-        <h3 className="mb-2 text-lg font-semibold text-white sm:text-xl">{title}</h3>
-        <p className="text-xs text-gray-400 sm:text-sm">{description}</p>
+        <h3 className="mb-2 text-lg font-medium text-white sm:text-xl">{title}</h3>
+        <p className="text-xs text-zinc-400 font-light tracking-wide sm:text-sm">{description}</p>
       </div>
 
       <div className="mb-4 sm:mb-6">
-        <span className="text-2xl font-bold text-white sm:text-4xl">{price}</span>
+        <span className="text-2xl font-light tracking-tighter text-white sm:text-4xl">{price}</span>
       </div>
 
       <ul className="mb-6 space-y-3 text-sm sm:mb-8 sm:space-y-4 sm:text-base">
         {features.map((feature, index) => (
-          <li key={index} className="flex items-center gap-2 text-gray-300 sm:gap-3">
-            <Check className="h-4 w-4 text-blue-500 sm:h-5 sm:w-5" />
+          <li key={index} className="flex items-center gap-2 text-zinc-300 font-light sm:gap-3">
+            <Check className="h-4 w-4 text-zinc-500 sm:h-5 sm:w-5" />
             {feature}
           </li>
         ))}
@@ -60,7 +58,7 @@ const PricingCard = ({
         onClick={() =>
           window.open(`https://wa.me/+212721220118?text=${message + title + ' plan.'}`, '_blank')
         }
-        className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-400 px-4 py-2.5 text-sm font-medium text-white transition-all hover:from-blue-500 hover:to-blue-300 sm:py-3 sm:text-base"
+        className="w-full rounded-full bg-white/10 border border-white/10 hover:bg-white/20 px-4 py-2.5 text-sm font-light text-white transition-all backdrop-blur-md sm:py-3 sm:text-base"
       >
         Get Started
       </button>
@@ -127,79 +125,79 @@ export function PricingSection() {
     {
       title: '1 Month',
       price: '499 MAD',
-      description: '',
+      description: 'The Degen Entry',
       features: [
-        'Advanced market analysis',
-        'Trading signals',
-        'Daily portfolio review',
-        '24/7 dedicated support',
-        'Access to educational content',
-        'Advanced risk management',
-        'Compliance & legal support',
+        'Real-time Memecoin Signals',
+        '1-Click Swap Shortcuts',
+        'Automated Rug Checks',
+        '24/7 Degen Support',
+        'Advanced Risk Analytics',
+        'Priority Signal Notifications',
+        'Access to Alpha Group',
       ],
     },
     {
       title: '3 Months',
       price: '999 MAD',
-      description: '',
+      description: 'Whale Apprentice',
       features: [
-        'Advanced market analysis',
-        'Trading signals',
-        'Daily portfolio review',
-        '24/7 dedicated support',
-        'Access to educational content',
-        'Advanced risk management',
-        'Compliance & legal support',
+        'Real-time Memecoin Signals',
+        '1-Click Swap Shortcuts',
+        'Automated Rug Checks',
+        '24/7 Degen Support',
+        'Advanced Risk Analytics',
+        'Priority Signal Notifications',
+        'Access to Alpha Group',
       ],
       isPopular: true,
     },
     {
       title: '6 Months',
       price: '1599 MAD',
-      description: '',
+      description: 'Alpha Hunter',
       features: [
-        'Advanced market analysis',
-        'Trading signals',
-        'Daily portfolio review',
-        '24/7 dedicated support',
-        'Access to educational content',
-        'Advanced risk management',
-        'Compliance & legal support',
+        'Real-time Memecoin Signals',
+        '1-Click Swap Shortcuts',
+        'Automated Rug Checks',
+        '24/7 Degen Support',
+        'Advanced Risk Analytics',
+        'Priority Signal Notifications',
+        'Access to Alpha Group',
       ],
     },
     {
       title: '1 Year',
       price: '2999 MAD',
-      description: '',
+      description: 'The Ultimate Whale',
       features: [
-        'Advanced market analysis',
-        'Trading signals',
-        'Daily portfolio review',
-        '24/7 dedicated support',
-        'Access to educational content',
-        'Advanced risk management',
-        'Compliance & legal support',
+        'Real-time Memecoin Signals',
+        '1-Click Swap Shortcuts',
+        'Automated Rug Checks',
+        '24/7 Degen Support',
+        'Advanced Risk Analytics',
+        'Priority Signal Notifications',
+        'Access to Alpha Group',
       ],
     },
   ];
 
   return (
     <section
-      className="relative min-h-screen w-full overflow-hidden py-12 sm:py-20"
+      className="relative w-full overflow-hidden py-24 md:py-32"
       ref={pricingRef}
     >
       <BackgroundBeams />
 
-      <div className="container relative mx-auto px-4">
+      <div className="container relative mx-auto px-6 max-w-6xl">
         {/* Section Header */}
         <motion.div
           style={{ opacity: titleOpacity, y: titleY }}
           className="mb-10 text-center sm:mb-16"
         >
-          <h2 className="mb-3 text-3xl font-bold text-white sm:mb-4 sm:text-4xl lg:text-5xl">
-            Choose Your <span className="text-blue-400">Plan</span>
+          <h2 className="mb-6 bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-4xl font-light tracking-tighter text-transparent md:text-6xl">
+            Choose Your <span className="text-white font-medium">Plan</span>
           </h2>
-          <p className="mx-auto max-w-2xl text-base text-gray-400 sm:text-lg">
+          <p className="mx-auto max-w-2xl text-base md:text-lg font-light tracking-wide text-zinc-400 leading-relaxed">
             Select the perfect plan for your crypto journey. All plans include our core features.
           </p>
         </motion.div>
@@ -207,10 +205,12 @@ export function PricingSection() {
         {/* Pricing Cards */}
         <motion.div
           style={{ opacity: cardsOpacity, y: cardsY }}
-          className="flex flex-col items-center gap-6 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 justify-center w-full"
         >
           {plans.map((plan, index) => (
-            <PricingCard key={index} {...plan} />
+             <div key={index} className="flex w-full justify-center">
+              <PricingCard {...plan} />
+            </div>
           ))}
         </motion.div>
       </div>

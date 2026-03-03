@@ -65,9 +65,9 @@ export function ServicesSection() {
   });
 
   return (
-    <section className="relative min-h-screen w-full overflow-hidden">
+    <section className="relative w-full overflow-hidden py-24 md:py-32">
       <BackgroundBeams />
-      <div className="container relative mx-auto mb-10 px-4">
+      <div className="container relative mx-auto px-6 max-w-6xl">
         {/* Section Header */}
         <div className="relative" ref={servicesRef}>
           <motion.div
@@ -82,24 +82,21 @@ export function ServicesSection() {
                 opacity: titleOpacity,
                 y: titleY,
               }}
-              className="mb-6 mt-32 bg-gradient-to-r from-white to-white/60 bg-clip-text text-4xl font-bold text-transparent md:text-6xl"
+              className="mb-6 bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-4xl font-light tracking-tighter text-transparent md:text-6xl"
             >
-              Trusted <span className="gradient-text">Today</span> and{' '}
-              <span className="gradient-text">Tomorrow</span>
+              Catch the <span className="text-white font-medium">Pump</span> Before the{' '}
+              <span className="text-white font-medium">Dump</span>
             </motion.h2>
             <motion.p
               style={{
                 opacity: descriptionOpacity,
                 y: descriptionY,
               }}
-              className="mx-auto max-w-3xl text-lg font-light text-gray-400"
+              className="mx-auto max-w-3xl text-base md:text-lg font-light tracking-wide text-zinc-400 leading-relaxed"
             >
-              We empower individuals and businesses to succeed in the dynamic world of
-              cryptocurrencies by offering tailored investment advisory, portfolio management,
-              market analysis, and blockchain project development. Whether you&apos;re a seasoned
-              investor or just starting out, we provide expert strategies, educational resources,
-              and hands-on training to help you make informed decisions and seize profitable
-              opportunities maximizing value and ensuring long-term returns.
+              We empower degens with institutional-grade tools to master the memecoin markets.
+              From 1-click swaps to automated contract security checks, we provide the alpha
+              you need to find 100x gems safely and efficiently.
             </motion.p>
             {/* <motion.div
               style={{

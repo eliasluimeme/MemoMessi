@@ -96,18 +96,16 @@ const TestimonialCard = ({ index }: { index: number }) => {
   const testimonial = testimonials[index % testimonials.length];
 
   return (
-    <div className="group relative w-[280px] shrink-0 overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-b from-white/5 via-white/10 to-white/5 p-4 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-transparent hover:shadow-[0_0_30px_4px_rgba(59,130,246,0.1)] sm:w-[340px] sm:p-8 md:w-[400px]">
+    <div className="group relative w-[280px] shrink-0 overflow-hidden rounded-3xl border border-white/5 bg-white/[0.02] p-6 backdrop-blur-xl transition-all duration-500 hover:bg-white/[0.04] sm:w-[340px] sm:p-8 md:w-[400px]">
       <CardGradient />
       {/* Glass Effects */}
-      <div className="absolute -inset-[1px] -z-10 rounded-3xl bg-gradient-to-b from-blue-500/10 via-blue-500/5 to-transparent opacity-0 blur-sm transition-all duration-500 group-hover:opacity-100" />
-      <div className="absolute -inset-[2px] -z-10 rounded-3xl bg-gradient-to-t from-blue-500/5 via-transparent to-blue-300/5" />
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-black/50 via-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
       {/* Quote Icon */}
       <div className="mb-4 sm:mb-6">
-        <div className="inline-block rounded-full bg-blue-500/5 p-2.5 transition-colors duration-500 group-hover:bg-blue-500/10 sm:p-3.5">
+        <div className="inline-block rounded-full bg-white/5 border border-white/10 p-2.5 transition-colors duration-500 group-hover:bg-white/10 sm:p-3.5">
           <svg
-            className="h-4 w-4 text-blue-400 transition-colors duration-500 group-hover:text-blue-300 sm:h-6 sm:w-6"
+            className="h-4 w-4 text-zinc-400 transition-colors duration-500 group-hover:text-zinc-300 sm:h-6 sm:w-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -124,21 +122,18 @@ const TestimonialCard = ({ index }: { index: number }) => {
 
       {/* Testimonial Content */}
       <blockquote className="mb-6 sm:mb-8">
-        <p className="text-sm font-light leading-relaxed text-gray-300 transition-colors duration-500 group-hover:text-white sm:text-lg">
+        <p className="text-sm font-light leading-relaxed text-zinc-400 transition-colors duration-500 group-hover:text-zinc-300 sm:text-lg tracking-wide">
           &quot;{testimonial.quote}&quot;
         </p>
       </blockquote>
 
       {/* Author */}
       <div className="flex items-center gap-3 sm:gap-4">
-        <div className="h-10 w-10 overflow-hidden rounded-full bg-gradient-to-br from-blue-400/10 to-blue-600/10 transition-all duration-500 group-hover:from-blue-400/20 group-hover:to-blue-600/20 sm:h-12 sm:w-12">
-          <div className="h-full w-full rounded-full bg-gradient-to-br from-blue-400/5 to-blue-600/5 p-1 transition-all duration-500 group-hover:from-blue-400/10 group-hover:to-blue-600/10">
-            <div className="h-full w-full rounded-full bg-blue-950/50 transition-colors duration-500 group-hover:bg-blue-900/50" />
-          </div>
+        <div className="h-10 w-10 overflow-hidden rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 sm:h-12 sm:w-12">
         </div>
         <div>
           <div className="text-sm font-medium text-white sm:text-base">{testimonial.author}</div>
-          <div className="text-xs text-gray-400 transition-colors duration-500 group-hover:text-gray-300 sm:text-sm">
+          <div className="text-xs font-light tracking-wide text-zinc-500 transition-colors duration-500 group-hover:text-zinc-400 sm:text-sm">
             {testimonial.company}
           </div>
         </div>
@@ -185,10 +180,10 @@ export function TestimonialsSection() {
   return (
     <section
       id="testimonials"
-      className="relative min-h-[80vh] w-full overflow-hidden sm:min-h-screen"
+      className="relative w-full overflow-hidden py-24 md:py-32"
       ref={testimonialsRef}
     >
-      <div className="container relative mx-auto px-4 py-12 sm:py-24">
+      <div className="container relative mx-auto px-6 max-w-6xl">
         {/* Section Header */}
         <div className="mb-12 text-center sm:mb-20">
           <motion.h2
@@ -196,23 +191,23 @@ export function TestimonialsSection() {
               opacity: testimonialsTitleOpacity,
               y: testimonialsTitleY,
             }}
-            className="mb-4 bg-gradient-to-r from-white to-white/60 bg-clip-text text-4xl font-bold text-transparent md:text-6xl"
+            className="mb-6 bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-4xl font-light tracking-tighter text-transparent md:text-6xl"
           >
-            What Our <span className="gradient-text">Clients </span>Say
+            What Our <span className="text-white font-medium">Clients </span>Say
           </motion.h2>
           <motion.p
             style={{
               opacity: testimonialsDescriptionOpacity,
               y: testimonialsDescriptionY,
             }}
-            className="mx-auto max-w-2xl text-base font-light text-gray-400 sm:text-lg"
+            className="mx-auto max-w-2xl text-base md:text-lg font-light tracking-wide text-zinc-400 leading-relaxed"
           >
             Discover why leading investors choose MemoMessi for their digital asset investments.
           </motion.p>
         </div>
 
         {/* Floating Glow Circle */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
           <motion.div
             animate={{
               scale: [1, 1.2, 1],
@@ -223,7 +218,7 @@ export function TestimonialsSection() {
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-            className="h-64 w-64 rounded-full bg-blue-500/20 blur-[100px] sm:h-96 sm:w-96"
+            className="h-64 w-64 rounded-full bg-indigo-500/10 blur-[100px] sm:h-96 sm:w-96"
           />
         </div>
 

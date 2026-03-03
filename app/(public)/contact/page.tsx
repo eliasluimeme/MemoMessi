@@ -16,7 +16,7 @@ export default function ContactPage() {
 
   const handleWhatsAppClick = () => {
     // Replace with your actual WhatsApp number
-    window.open('https://wa.me/0721220118', '_blank');
+    window.open('https://wa.me/000000000', '_blank');
   };
 
   return (

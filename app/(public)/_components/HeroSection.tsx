@@ -17,7 +17,7 @@ export function HeroSection({ scrollYProgress }: HeroSectionProps) {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
 
   return (
-    <motion.section className="relative min-h-screen" style={{ y, opacity, scale }}>
+    <motion.section className="relative w-full py-32 md:py-48" style={{ y, opacity, scale }}>
       {/* Stars background */}
       <div className="absolute inset-0">
         {/* First layer - closer stars */}
@@ -81,30 +81,30 @@ export function HeroSection({ scrollYProgress }: HeroSectionProps) {
       </div>
 
       {/* Center glow effect */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
         <div className="relative">
-          <div className="absolute -left-[175px] -top-[175px] h-[350px] w-[350px] animate-glow-pulse bg-blue-500/20 blur-[70px]" />
-          <div className="absolute -left-[150px] -top-[150px] h-[300px] w-[300px] animate-glow-pulse bg-blue-400/20 blur-[60px] [animation-delay:1s]" />
-          <div className="absolute -left-[125px] -top-[125px] h-[250px] w-[250px] animate-glow-pulse bg-blue-300/20 blur-[50px] [animation-delay:2s]" />
+          <div className="absolute -left-[175px] -top-[175px] h-[350px] w-[350px] animate-glow-pulse bg-indigo-500/10 blur-[100px]" />
+          <div className="absolute -left-[150px] -top-[150px] h-[300px] w-[300px] animate-glow-pulse bg-blue-500/10 blur-[100px] [animation-delay:1s]" />
+          <div className="absolute -left-[125px] -top-[125px] h-[250px] w-[250px] animate-glow-pulse bg-purple-500/10 blur-[100px] [animation-delay:2s]" />
         </div>
       </div>
 
       {/* Content */}
-      <div className="container relative mx-auto flex min-h-screen flex-col items-center justify-center px-4 pt-20 text-center">
+      <div className="container relative mx-auto flex flex-col items-center justify-center px-6 text-center max-w-6xl">
         {/* Main heading */}
         <motion.h1
           style={{
             scale: useTransform(scrollYProgress, [0, 1], [1, 0.9]),
             opacity: useTransform(scrollYProgress, [0, 0.7], [1, 0]),
           }}
-          className="mb-6 max-w-4xl text-5xl font-light leading-tight text-white md:text-6xl lg:text-7xl"
+          className="mb-6 max-w-4xl text-5xl font-light tracking-tighter leading-tight text-white md:text-6xl lg:text-7xl"
         >
           <motion.span
             style={{
               x: useTransform(scrollYProgress, [0, 1], [0, -30]),
               opacity: useTransform(scrollYProgress, [0, 0.6], [1, 0]),
             }}
-            className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent"
+            className="bg-gradient-to-r from-zinc-200 to-zinc-400 bg-clip-text text-transparent"
           >
             MemoMessi
           </motion.span>
@@ -115,7 +115,7 @@ export function HeroSection({ scrollYProgress }: HeroSectionProps) {
               opacity: useTransform(scrollYProgress, [0, 0.6], [1, 0]),
             }}
           >
-            investing in crypto
+            the future of memecoins
           </motion.span>
         </motion.h1>
 
@@ -125,10 +125,10 @@ export function HeroSection({ scrollYProgress }: HeroSectionProps) {
             y: useTransform(scrollYProgress, [0, 1], [0, 30]),
             opacity: useTransform(scrollYProgress, [0, 0.5], [1, 0]),
           }}
-          className="mb-12 max-w-2xl text-lg font-light text-gray-400"
+          className="mb-12 max-w-2xl text-base md:text-lg font-light tracking-wide text-zinc-400 leading-relaxed"
         >
-          We provide a secure, feature-rich platform that simplifies the investment process and
-          opens the door to new possibilities in the crypto market.
+          Discover 100x gems before they hit the moon. One-click swaps, real-time rug checks,
+          and institutional-grade alpha for the degens.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -149,7 +149,7 @@ export function HeroSection({ scrollYProgress }: HeroSectionProps) {
           >
             <Button
               size="lg"
-              className="group relative overflow-hidden rounded-full bg-blue-600 px-8 py-6 text-white transition-all duration-500 hover:shadow-glow"
+              className="group relative overflow-hidden rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/10 px-8 py-6 text-white transition-all duration-500"
               onClick={() => (window.location.href = '/login')}
             >
               Get Started

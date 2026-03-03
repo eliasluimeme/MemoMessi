@@ -28,7 +28,7 @@ export default function Home() {
   }, [setTheme]);
 
   return (
-    <div className="flex min-h-screen flex-col overflow-hidden bg-black/60">
+    <div className="flex min-h-screen flex-col overflow-hidden bg-[#09090b]">
       <main className="flex-grow" ref={targetRef}>
         <BackgroundBeams />
         <HeroSection scrollYProgress={scrollYProgress} />

@@ -40,7 +40,7 @@ export default function Navbar() {
               key={item.name}
               href={item.href}
               onClick={(e) => handleNavClick(e, item.href)}
-              className="relative text-sm font-bold text-gray-300/90 transition-all duration-300 after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-blue-400 after:transition-all after:duration-300 hover:text-blue-400 hover:after:w-full"
+              className="relative text-sm font-medium tracking-wide text-zinc-400 transition-all duration-300 hover:text-white"
             >
               {item.name}
             </Link>
@@ -49,7 +49,7 @@ export default function Navbar() {
 
         <Link
           href="/"
-          className="text-2xl font-light tracking-wider text-white transition-all duration-300 hover:text-blue-400"
+          className="text-2xl font-light tracking-wider text-white transition-all duration-300 hover:text-white"
         >
           <Image src="/logo.png" alt="MemoMessi" width={46} height={46} className="h-8 w-auto" />
         </Link>
@@ -60,7 +60,7 @@ export default function Navbar() {
               key={item.name}
               href={item.href}
               onClick={(e) => handleNavClick(e, item.href)}
-              className="relative text-sm font-bold text-gray-300/90 transition-all duration-300 after:absolute after:-bottom-1 after:left-0 after:h-px after:w-0 after:bg-blue-400 after:transition-all after:duration-300 hover:text-blue-400 hover:after:w-full"
+              className="relative text-sm font-medium tracking-wide text-zinc-400 transition-all duration-300 hover:text-white"
             >
               {item.name}
             </Link>
@@ -83,7 +83,7 @@ export default function Navbar() {
                 <Link
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
-                  className="w-full text-sm font-light text-gray-300/90 transition-all duration-300 hover:text-blue-400"
+                  className="w-full text-sm font-light text-gray-300/90 transition-all duration-300 hover:text-white"
                 >
                   {item.name}
                 </Link>

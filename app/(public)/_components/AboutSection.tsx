@@ -6,7 +6,7 @@ import { Shape3D } from './Shape3D';
 
 export function AboutSection() {
   return (
-    <section className="relative min-h-screen w-full overflow-hidden">
+    <section className="relative w-full overflow-hidden py-24 md:py-32">
       {/* Background grid effect */}
       <div className="absolute inset-0">
         {/* Diagonal lines */}
@@ -33,18 +33,18 @@ export function AboutSection() {
       </div>
 
       {/* Content container */}
-      <div className="container relative mx-auto px-4 pt-32">
+      <div className="container relative mx-auto px-6 max-w-6xl">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-          viewport={{ once: false, margin: '-20%' }}
-          className="flex flex-col items-center justify-between gap-4 lg:flex-row lg:items-center"
+          viewport={{ once: true, margin: '-20%' }}
+          className="flex flex-col items-center justify-between gap-12 lg:flex-row lg:items-center"
         >
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false, margin: '-20%' }}
+            viewport={{ once: true, margin: '-20%' }}
             transition={{
               duration: 1.2,
               ease: [0.22, 1, 0.36, 1],
@@ -54,34 +54,32 @@ export function AboutSection() {
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, margin: '-20%' }}
+              viewport={{ once: true, margin: '-20%' }}
               transition={{
                 duration: 1.2,
                 ease: [0.22, 1, 0.36, 1],
                 delay: 0.2,
               }}
-              className="mb-8 text-4xl font-bold leading-tight text-white lg:text-5xl"
+              className="mb-8 text-4xl font-light tracking-tighter text-white lg:text-5xl md:text-6xl"
             >
-              What is <span className="gradient-text">MemoMessi ?</span>
+              What is <span className="bg-gradient-to-r from-zinc-200 to-zinc-500 bg-clip-text text-transparent font-medium">MemoMessi ?</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, margin: '-20%' }}
+              viewport={{ once: true, margin: '-20%' }}
               transition={{
                 duration: 1.2,
                 ease: [0.22, 1, 0.36, 1],
                 delay: 0.4,
               }}
-              className="mb-10 text-lg font-light leading-relaxed text-gray-400"
+              className="mb-10 text-base md:text-lg font-light tracking-wide text-zinc-400 leading-relaxed"
             >
-              Welcome to MemoMessi whales! I&apos;m Youssef, a seasoned analyst and expert in the
-              cryptocurrency market. With years of experience, I specialize in empowering investors
-              and enthusiasts by providing robust strategies, precise analyses, and practical tools
-              to simplify the world of blockchain and digital assets. My mission is clear: to help
-              you uncover promising opportunities, navigate market risks, and turn your ambitions
-              into tangible success. Join me in exploring the limitless potential of the financial
-              revolution driven by cryptocurrencies!
+              Welcome to MemoMessi. I&apos;m Soufian, a seasoned analyst specializing in the 
+              memecoin market. My mission is to empower investors with high-conviction signals, 
+              real-time security checks, and lightning-fast execution tools. Join us to find the 
+              next 100x gem before the crowd, and safely navigate the most profitable corner 
+              of the crypto revolution.
             </motion.p>
           </motion.div>
 
@@ -89,7 +87,7 @@ export function AboutSection() {
           <motion.div
             initial={{ opacity: 0, x: 50, scale: 0.9 }}
             whileInView={{ opacity: 1, x: 0, scale: 1 }}
-            viewport={{ once: false, margin: '-20%' }}
+            viewport={{ once: true, margin: '-20%' }}
             transition={{
               duration: 1.5,
               ease: [0.22, 1, 0.36, 1],
@@ -100,7 +98,7 @@ export function AboutSection() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 50 }}
                 whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: false, margin: '-20%' }}
+                viewport={{ once: true, margin: '-20%' }}
                 transition={{
                   duration: 1.5,
                   ease: [0.22, 1, 0.36, 1],
