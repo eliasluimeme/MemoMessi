@@ -77,7 +77,7 @@ export default function Dashboard() {
           </MotionItem>
 
           <MotionItem className="lg:col-span-4">
-            <div className="sticky top-24 rounded-[32px] border border-primary/20 bg-primary/5 p-10 overflow-hidden relative group">
+            <div className="sticky top-24 rounded-[32px] border border-primary/20 bg-primary/5 p-10 overflow-hidden group">
               <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity duration-700">
                 <Zap className="w-48 h-48 text-primary blur-3xl" />
               </div>

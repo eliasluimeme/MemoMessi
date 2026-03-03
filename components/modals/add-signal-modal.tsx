@@ -366,33 +366,42 @@ export default function AddSignalModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-hidden p-0">
-        <DialogHeader className="border-b bg-background p-6">
-          <DialogTitle>Add Signal 🚀</DialogTitle>
-          <DialogDescription>
-            Use Magic Input to instantly fetch token details or enter manually.
-          </DialogDescription>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-hidden p-0 border dark:border-white/[0.08] border-border/60 dark:bg-[#0a0a0a] bg-background rounded-2xl shadow-2xl">
+
+        {/* Header */}
+        <DialogHeader className="border-b dark:border-white/[0.06] border-border/50 px-6 py-5">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl dark:bg-primary/10 bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <RocketIcon className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <DialogTitle className="text-base font-semibold tracking-tight text-foreground">Add Signal</DialogTitle>
+              <DialogDescription className="text-xs dark:text-muted-foreground/50 text-muted-foreground/70 mt-0.5 font-light">
+                Use Magic Input to fetch token details or enter manually.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 max-h-[calc(90vh-8.5rem)] overflow-y-auto">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6 p-6">
+        <div className="max-h-[calc(90vh-5.5rem)] overflow-y-auto scrollbar-hide">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-6">
 
-            {/* The Magic Input Section */}
-            <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Zap className="h-5 w-5 text-blue-500" />
-                <h3 className="font-semibold text-blue-500">Magic Input</h3>
+            {/* Magic Input Section */}
+            <div className="rounded-xl border dark:border-blue-500/20 border-blue-500/30 dark:bg-blue-500/[0.04] bg-blue-500/[0.03] p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="h-3.5 w-3.5 text-blue-500" />
+                <span className="text-[10px] font-black uppercase tracking-[0.25em] text-blue-500">Magic Input</span>
               </div>
-              <div className="flex flex-col gap-4 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <div className="flex-none">
                   <Select
                     value={formData.network}
                     onValueChange={(value) => handleInputChange('network', value)}
                   >
-                    <SelectTrigger className="w-[120px] bg-background">
+                    <SelectTrigger className="w-[110px] h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.03] bg-background text-sm">
                       <SelectValue placeholder="Network" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-xl dark:border-white/[0.08] border-border/60">
                       <SelectItem value="solana">Solana</SelectItem>
                       <SelectItem value="base">Base</SelectItem>
                       <SelectItem value="eth">Ethereum</SelectItem>
@@ -403,49 +412,48 @@ export default function AddSignalModal({
                 <div className="flex-1 relative">
                   <Input
                     placeholder="Paste Contract Address (CA)"
-                    className="font-mono bg-background"
+                    className="font-mono h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.03] bg-background text-sm pr-20"
                     value={formData.contractAddress}
                     onChange={(e) => handleInputChange('contractAddress', e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && fetchGeckoToken()}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), fetchGeckoToken())}
                     error={formErrors.contractAddress}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-1 top-1 h-8 px-2 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 hover:text-blue-600"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 rounded-md dark:bg-blue-500/10 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 text-[11px] font-bold"
                     onClick={fetchGeckoToken}
                     disabled={isFetchingToken || !formData.contractAddress}
                   >
-                    {isFetchingToken ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4 mr-1" />}
-                    {isFetchingToken ? '' : 'Fetch'}
+                    {isFetchingToken ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <><Search className="h-3 w-3 mr-1" />Fetch</>}
                   </Button>
                 </div>
               </div>
 
               {/* Token Info Preview */}
               {tokenInfo && (
-                <div className="mt-4 flex flex-col gap-3 rounded-lg bg-background p-4 border border-border/50">
-                  <div className="flex flex-wrap items-center gap-4 text-sm">
-                    <div className="flex flex-col">
-                      <span className="text-muted-foreground text-xs uppercase">Token</span>
-                      <span className="font-bold">{tokenInfo.name} ({tokenInfo.symbol})</span>
+                <div className="mt-3 rounded-lg dark:bg-white/[0.03] bg-muted/40 border dark:border-white/[0.06] border-border/40 p-3">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest dark:text-white/30 text-muted-foreground/60 mb-0.5">Token</p>
+                      <p className="text-sm font-semibold text-foreground">{tokenInfo.name} <span className="dark:text-white/40 text-muted-foreground/60 font-normal">({tokenInfo.symbol})</span></p>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-muted-foreground text-xs uppercase">Price</span>
-                      <span className="font-medium font-mono">${tokenInfo.price.toFixed(8).replace(/\.?0+$/, '')}</span>
+                    <div>
+                      <p className="text-[9px] uppercase tracking-widest dark:text-white/30 text-muted-foreground/60 mb-0.5">Price</p>
+                      <p className="text-sm font-mono font-semibold text-foreground">${tokenInfo.price.toFixed(8).replace(/\.?0+$/, '')}</p>
                     </div>
                     {tokenInfo.liquidity && (
-                      <div className="flex flex-col">
-                        <span className="text-muted-foreground text-xs uppercase">Liquidity</span>
-                        <span>${Number(tokenInfo.liquidity).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                      <div>
+                        <p className="text-[9px] uppercase tracking-widest dark:text-white/30 text-muted-foreground/60 mb-0.5">Liquidity</p>
+                        <p className="text-sm font-semibold text-foreground">${Number(tokenInfo.liquidity).toLocaleString(undefined, { maximumFractionDigits: 0 })}</p>
                       </div>
                     )}
                     {rugCheckScore && (
-                      <div className="flex flex-col ml-auto">
-                        <Badge variant={rugCheckScore.risks > 2 || rugCheckScore.isRugged ? 'destructive' : 'success'} className="flex items-center gap-1">
+                      <div className="ml-auto">
+                        <Badge variant={rugCheckScore.risks > 2 || rugCheckScore.isRugged ? 'destructive' : 'success'} className="flex items-center gap-1 text-[10px] rounded-full px-2.5 py-1">
                           {rugCheckScore.risks > 2 || rugCheckScore.isRugged ? <ShieldAlert className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
-                          RugCheck: {rugCheckScore.risks > 2 ? `High Risk (${rugCheckScore.risks})` : 'Safe'}
+                          {rugCheckScore.risks > 2 ? `High Risk (${rugCheckScore.risks})` : 'Safe'}
                         </Badge>
                       </div>
                     )}
@@ -454,122 +462,119 @@ export default function AddSignalModal({
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            {/* Trading Pair + Action */}
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <p className="text-sm font-medium">Trading Pair</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Trading Pair</p>
                 <Input
                   placeholder="e.g., SOL/USDT"
                   value={formData.pair}
                   onChange={(e) => handleInputChange('pair', e.target.value)}
                   error={formErrors.pair}
+                  className="h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm"
                 />
               </div>
-
               <div className="space-y-2">
-                <p className="text-sm font-medium">Action</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Direction</p>
                 <Select
                   value={formData.action.toLowerCase()}
-                  onValueChange={(value: string) =>
-                    handleInputChange('action', value.toUpperCase())
-                  }
+                  onValueChange={(value: string) => handleInputChange('action', value.toUpperCase())}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm">
                     <SelectValue placeholder="Select action" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="buy">Buy</SelectItem>
-                    <SelectItem value="sell">Sell</SelectItem>
+                  <SelectContent className="rounded-xl dark:border-white/[0.08] border-border/60">
+                    <SelectItem value="buy">
+                      <span className="flex items-center gap-2 text-emerald-500 font-semibold">Long / Buy</span>
+                    </SelectItem>
+                    <SelectItem value="sell">
+                      <span className="flex items-center gap-2 text-rose-500 font-semibold">Short / Sell</span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            {/* Entry + Stop Loss */}
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Entry Price</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Entry Price</p>
                   {tokenInfo && (
-                    <Button type="button" variant="ghost" size="sm" onClick={applySmartZones} className="h-6 text-xs text-blue-500 px-2 flex gap-1">
-                      <Zap className="h-3 w-3" /> Auto-fill Zones
-                    </Button>
+                    <button type="button" onClick={applySmartZones} className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-blue-500 hover:text-blue-400 transition-colors">
+                      <Zap className="h-2.5 w-2.5" /> Auto Zones
+                    </button>
                   )}
                 </div>
                 <Input
                   type="text"
                   inputMode="decimal"
-                  placeholder="Entry Price"
+                  placeholder="0.000000"
                   value={formData.entryZone}
                   onChange={(e) => handleInputChange('entryZone', e.target.value)}
                   error={formErrors.entryZone}
+                  className="h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm font-mono"
                 />
               </div>
-
               <div className="space-y-2">
-                <p className="text-sm font-medium">Stop Loss (Optional)</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Stop Loss <span className="normal-case tracking-normal font-normal dark:text-white/20 text-muted-foreground/50">(optional)</span></p>
                 <Input
                   type="text"
                   inputMode="decimal"
-                  placeholder="Optional"
+                  placeholder="0.000000"
                   value={formData.stopLoss}
                   onChange={(e) => handleInputChange('stopLoss', e.target.value)}
                   error={formErrors.stopLoss}
+                  className="h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm font-mono"
                 />
               </div>
             </div>
 
-            <div className="space-y-4">
+            {/* Take Profit Targets */}
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">Take Profit Targets</p>
-                  <p className="text-xs text-muted-foreground">At least 1 target required</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Take Profit Targets</p>
+                  <p className="text-[10px] dark:text-white/20 text-muted-foreground/50 mt-0.5">At least 1 target required</p>
                 </div>
-
-                <Button
+                <button
                   type="button"
                   onClick={addTakeProfit}
-                  variant="outline"
-                  size="sm"
                   disabled={formData.takeProfit.length >= 8}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg border dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background dark:text-white/40 text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider hover:dark:border-white/[0.15] hover:border-border transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <Plus className="size-4 mr-1" />
-                  Add Target
-                </Button>
+                  <Plus className="h-3 w-3" /> Add Target
+                </button>
               </div>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {formData.takeProfit.map((profit, index) => (
-                  <div key={index} className="relative space-y-2 bg-muted/30 p-3 rounded-lg border">
+                  <div key={index} className="relative rounded-xl border dark:border-white/[0.06] border-border/50 dark:bg-white/[0.02] bg-muted/20 p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium text-muted-foreground">
-                        Target {index + 1}
-                      </p>
+                      <p className="text-[9px] font-black uppercase tracking-widest dark:text-white/25 text-muted-foreground/50">TP {index + 1}</p>
                       {Number(profit.price) > 0 && (
-                        <p
-                          className={`text-xs font-medium ${profit.gain >= 0 ? 'text-emerald-500' : 'text-red-500'}`}
-                        >
-                          {profit.gain.toFixed(2)}%
-                        </p>
+                        <span className={`text-[10px] font-bold tabular-nums ${profit.gain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {profit.gain >= 0 ? '+' : ''}{profit.gain.toFixed(2)}%
+                        </span>
                       )}
                     </div>
                     <div className="relative">
                       <Input
                         type="text"
                         inputMode="decimal"
-                        className="pr-8 bg-background"
-                        placeholder={`Price`}
+                        className={`h-9 rounded-lg dark:border-white/[0.06] border-border/50 dark:bg-white/[0.02] bg-background text-sm font-mono ${index > 0 ? 'pr-8' : ''}`}
+                        placeholder="Price"
                         value={profit.price}
                         onChange={(e) => handleTakeProfitChange(index, e.target.value)}
                         error={formErrors.takeProfit?.[index]}
                       />
                       {index > 0 && (
-                        <Button
+                        <button
                           type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-1 top-1/2 size-7 -translate-y-1/2 rounded-md hover:bg-destructive/10 hover:text-destructive"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center rounded-md dark:text-white/20 text-muted-foreground/40 hover:text-rose-500 transition-colors"
                           onClick={() => removeTakeProfit(index)}
                         >
-                          <X className="size-3.5" />
-                        </Button>
+                          <X className="h-3 w-3" />
+                        </button>
                       )}
                     </div>
                   </div>
@@ -577,40 +582,44 @@ export default function AddSignalModal({
               </div>
             </div>
 
+            {/* Note */}
             <div className="space-y-2">
-              <p className="text-sm font-medium">Analysis & Note (Optional)</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Analysis & Note <span className="normal-case tracking-normal font-normal dark:text-white/20 text-muted-foreground/50">(optional)</span></p>
               <Textarea
                 placeholder="Add your technical analysis and important note here..."
                 value={formData.note}
                 onChange={(e) => handleInputChange('note', e.target.value)}
-                className="min-h-[80px]"
+                className="min-h-[80px] rounded-xl dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm resize-none"
               />
-              {submitError && <p className="text-sm text-destructive font-medium">{submitError}</p>}
+              {submitError && (
+                <div className="flex items-center gap-2 text-[11px] text-rose-500 font-medium mt-1">
+                  <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+                  {submitError}
+                </div>
+              )}
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <Button
+            {/* Footer */}
+            <div className="flex justify-end gap-3 pt-4 border-t dark:border-white/[0.06] border-border/50">
+              <button
                 type="button"
-                variant="outline"
                 onClick={onClose}
                 disabled={isSubmitting}
-                className="w-full sm:w-auto"
+                className="h-10 px-5 rounded-xl border dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm dark:text-white/60 text-muted-foreground hover:dark:bg-white/[0.05] hover:bg-muted/50 transition-all disabled:opacity-40"
               >
                 Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="h-10 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
                 {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                    Posting...
-                  </>
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Posting...</>
                 ) : (
-                  <>
-                    <RocketIcon className="mr-2 size-4" />
-                    Post Signal
-                  </>
+                  <><RocketIcon className="h-4 w-4" /> Post Signal</>
                 )}
-              </Button>
+              </button>
             </div>
           </form>
         </div>

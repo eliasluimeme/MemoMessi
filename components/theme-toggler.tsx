@@ -21,10 +21,10 @@ export default function ThemeToggler() {
       size="lg"
       tooltip={theme === 'light' ? 'Dark Mode' : 'Light Mode'}
       onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-      className="rounded-2xl transition-all duration-500 text-muted-foreground/40 hover:text-foreground hover:bg-white/[0.02]"
+      className="rounded-2xl transition-all duration-500 text-muted-foreground/40 hover:text-foreground hover:bg-white/[0.02] group-data-[collapsible=icon]:justify-center"
     >
-      <div className="flex items-center gap-4 px-2">
-        {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+      <div className="flex items-center gap-4 px-2 group-data-[collapsible=icon]:px-0">
+        {theme === 'light' ? <Moon className="h-5 w-5 shrink-0" /> : <Sun className="h-5 w-5 shrink-0" />}
         <span className="text-[10px] font-black uppercase tracking-[0.2em] group-data-[collapsible=icon]:hidden">
           {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
         </span>

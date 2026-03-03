@@ -43,7 +43,7 @@ export default function SignalCard({ signal }: SignalCardProps) {
 
   return (
     <Link href={`/signals/${signal.id}`} className="block group h-full">
-      <div className="relative flex flex-col h-full rounded-2xl border dark:border-white/[0.06] border-border dark:bg-[#0a0a0a] bg-card backdrop-blur-xl p-5 gap-4 transition-all duration-300 dark:hover:border-white/[0.1] hover:border-border/80 hover:-translate-y-0.5 overflow-hidden shadow-sm dark:shadow-none dark:shadow-none">
+      <div className="relative flex flex-col h-full rounded-2xl border dark:border-white/[0.06] border-border dark:bg-[#0a0a0a] bg-card backdrop-blur-xl p-5 gap-4 transition-all duration-300 dark:hover:border-white/[0.1] hover:border-border/80 hover:-translate-y-0.5 overflow-hidden shadow-sm dark:shadow-none">
 
         {/* Header */}
         <div className="flex items-center gap-3">

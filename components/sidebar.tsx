@@ -80,18 +80,18 @@ export default function Sidebar({ items }: { items: SidebarItem[] }) {
                   isActive={isActive}
                   asChild
                   className={cn(
-                    "transition-all duration-500 rounded-2xl px-4",
+                    "transition-all duration-500 rounded-2xl px-4 group-data-[collapsible=icon]:px-0",
                     isActive ? "bg-white/[0.04] text-foreground" : "text-muted-foreground/40 hover:text-foreground hover:bg-white/[0.02]"
                   )}
                 >
                   <Link
                     href={item.path}
                     onClick={handleItemClick}
-                    className="flex items-center gap-4"
+                    className="flex items-center gap-4 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:w-full"
                   >
-                    <div className="relative flex items-center justify-center">
+                    <div className="relative flex items-center justify-center flex-shrink-0">
                       {isActive && (
-                        <div className="absolute -left-2 h-1 w-1 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)]" />
+                        <div className="absolute -left-2 h-1 w-1 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.8)] group-data-[collapsible=icon]:hidden" />
                       )}
                       <Icon className={cn(
                         "h-5 w-5 transition-all duration-500",
@@ -114,8 +114,8 @@ export default function Sidebar({ items }: { items: SidebarItem[] }) {
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 mt-auto">
-        <div className="flex flex-col gap-2 rounded-[28px] bg-white/[0.02] border border-white/[0.03] p-2">
+      <SidebarFooter className="p-4 mt-auto group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pb-4">
+        <div className="flex flex-col gap-2 rounded-[28px] dark:bg-white/[0.02] dark:border-white/[0.03] bg-muted/30 border border-border/40 p-2">
           <ThemeToggler />
           <SidebarMenu>
             <SidebarMenuItem>
@@ -123,16 +123,16 @@ export default function Sidebar({ items }: { items: SidebarItem[] }) {
                 asChild
                 size="lg"
                 tooltip="Logout"
-                className="rounded-2xl text-muted-foreground/40 hover:text-red-400 hover:bg-red-400/5 transition-all duration-500"
+                className="rounded-2xl text-muted-foreground/40 hover:text-red-400 hover:bg-red-400/5 transition-all duration-500 group-data-[collapsible=icon]:justify-center"
               >
                 <button
                   onClick={() => {
                     handleItemClick();
                     logout({ redirectUrl: '/' });
                   }}
-                  className="flex items-center gap-4 px-4"
+                  className="flex items-center gap-4 px-4 group-data-[collapsible=icon]:px-0"
                 >
-                  <LogOut className="h-5 w-5" />
+                  <LogOut className="h-5 w-5 shrink-0" />
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] group-data-[collapsible=icon]:hidden">
                     Logout
                   </span>
