@@ -2,8 +2,6 @@
 
 import { useState } from 'react';
 
-import { useRouter } from 'next/navigation';
-
 import useUserStore from '@/store/user';
 
 import { useToast } from '@/components/ui/toast-context';
@@ -14,7 +12,6 @@ interface UseSigninReturn {
 }
 
 export function useSignin(): UseSigninReturn {
-  const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const setUser = useUserStore((state) => state.setUser);
@@ -40,7 +37,7 @@ export function useSignin(): UseSigninReturn {
 
       const responseData = await response.json();
       if (response.status === 401 && responseData.redirectUrl) {
-        router.push(responseData.redirectUrl);
+        window.location.href = responseData.redirectUrl;
         return;
       }
       if (!response.ok) throw new Error(responseData.message || 'Invalid credentials');
@@ -51,8 +48,10 @@ export function useSignin(): UseSigninReturn {
         variant: 'success',
       });
 
-      router.push(responseData.redirectUrl);
       setUser(responseData.user);
+      // Hard redirect — clears router cache, ensures proxy + layout run fresh
+      // with the newly set auth cookies
+      window.location.href = responseData.redirectUrl;
     } catch (error) {
       setIsLoading(false);
       toast({

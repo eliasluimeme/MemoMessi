@@ -36,7 +36,7 @@ export function ClientsProfitSection() {
   return (
     <div className="relative overflow-hidden py-24 md:py-32">
       {/* Background pattern */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
+      <div className="absolute inset-0 bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
       <div className="pointer-events-none absolute inset-0" />
 
       <div className="container relative mx-auto px-6 max-w-[1400px]">

@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
 import { SignalWithTargets } from '@/types/signal';
 import {
@@ -19,34 +19,41 @@ import { Button } from '@/components/ui/button';
 import { CopyButton } from '@/components/copy-button';
 import JupiterTerminal from '@/components/jupiter-terminal';
 import { cn } from '@/lib/utils';
-
 import { getSession } from '@/lib/auth-utils';
 import { prisma } from '@/lib/prisma';
 
-async function getSignal(id: string): Promise<SignalWithTargets | null> {
-  const session = await getSession();
-  if (!session) return null;
+export const dynamic = 'force-dynamic';
 
-  return await prisma.signal.findUnique({
-    where: { id },
-    include: {
-      targets: {
-        orderBy: {
-          number: 'asc',
+async function getSignal(id: string): Promise<SignalWithTargets | 'unauthorized' | null> {
+  const session = await getSession();
+  if (!session) return 'unauthorized';
+
+  try {
+    return await prisma.signal.findUnique({
+      where: { id },
+      include: {
+        targets: {
+          orderBy: {
+            number: 'asc',
+          },
+        },
+        favorites: {
+          where: {
+            userId: session.id as string,
+          },
         },
       },
-      favorites: {
-        where: {
-          userId: session.id as string,
-        },
-      },
-    },
-  });
+    });
+  } catch (error) {
+    console.error('[SignalPage] Failed to fetch signal:', id, error);
+    return null;
+  }
 }
 
 export default async function SignalPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const signal = await getSignal(id);
+  if (signal === 'unauthorized') redirect('/login');
   if (!signal) notFound();
 
   const isSolana = signal.network === 'solana';

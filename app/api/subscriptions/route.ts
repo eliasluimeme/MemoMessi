@@ -8,7 +8,7 @@ async function checkAdmin() {
 
   if (error || !user) return null;
   const role = user.user_metadata.role || 'USER';
-  if (role !== 'ADMIN') return null;
+  if (role !== 'ADMIN' && role !== 'PRIVATE') return null;
 
   return user;
 }

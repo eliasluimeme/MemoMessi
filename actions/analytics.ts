@@ -14,7 +14,7 @@ const SUBSCRIPTION_PRICES = {
 export async function getGeneralAnalytics(): Promise<GeneralAnalytics> {
   const session = await getSession();
 
-  if (session?.role === Role.USER)
+  if (!session || (session.role !== Role.ADMIN && session.role !== Role.PRIVATE))
     throw new Error('Unauthorized: Admin access required');
 
   const now = new Date();
@@ -138,7 +138,7 @@ export async function getGeneralAnalytics(): Promise<GeneralAnalytics> {
 export async function getSignalAnalytics(): Promise<SignalAnalytics> {
   const session = await getSession();
 
-  if (session?.role === Role.USER)
+  if (!session || (session.role !== Role.ADMIN && session.role !== Role.PRIVATE))
     throw new Error('Unauthorized: Admin access required');
 
   const now = new Date();
@@ -324,7 +324,7 @@ export async function getSignalAnalytics(): Promise<SignalAnalytics> {
 export async function getUserAnalytics(): Promise<UserAnalytics> {
   const session = await getSession();
 
-  if (session?.role === Role.USER)
+  if (!session || (session.role !== Role.ADMIN && session.role !== Role.PRIVATE))
     throw new Error('Unauthorized: Admin access required');
 
   const now = new Date();
@@ -406,7 +406,7 @@ export async function getUserAnalytics(): Promise<UserAnalytics> {
 export async function getTelegramAnalytics(): Promise<GeneralAnalytics> {
   const session = await getSession();
 
-  if (session?.role === Role.USER)
+  if (!session || (session.role !== Role.ADMIN && session.role !== Role.PRIVATE))
     throw new Error('Unauthorized: Admin access required');
 
   const now = new Date();

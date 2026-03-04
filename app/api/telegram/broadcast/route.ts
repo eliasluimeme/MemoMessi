@@ -5,7 +5,7 @@ import { isAuthenticated } from '@/lib/auth-utils';
 export async function POST(req: Request) {
   try {
     const session = await isAuthenticated();
-    if (!session?.role || session.role !== 'ADMIN') {
+    if (!session?.role || (session.role !== 'ADMIN' && session.role !== 'PRIVATE')) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 

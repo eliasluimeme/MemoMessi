@@ -5,6 +5,8 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 
 import AnalyticsCards from './_components/analytics-cards';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboard() {
   const analytics = await getGeneralAnalytics();
 

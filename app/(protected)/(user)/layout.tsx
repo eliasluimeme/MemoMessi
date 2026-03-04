@@ -1,7 +1,11 @@
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 import Sidebar, { SidebarItem } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { getSession } from '@/lib/auth-utils';
+
+export const dynamic = 'force-dynamic';
 
 import Navbar from './_components/navbar';
 
@@ -37,6 +41,12 @@ const items: SidebarItem[] = [
 ];
 
 export default async function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
+
+  if (!session) {
+    redirect('/login');
+  }
+
   const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get('sidebar:state')?.value === 'true';
 

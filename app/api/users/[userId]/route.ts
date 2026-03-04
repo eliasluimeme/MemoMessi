@@ -7,7 +7,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ userId
     const supabase = await createClient();
     const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !currentUser || currentUser.user_metadata.role !== 'ADMIN') {
+    if (authError || !currentUser || (currentUser.user_metadata.role !== 'ADMIN' && currentUser.user_metadata.role !== 'PRIVATE')) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 

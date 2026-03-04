@@ -23,7 +23,7 @@ async function checkAdmin() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return null;
   const role = user.user_metadata.role || 'USER';
-  if (role !== 'ADMIN') return null;
+  if (role !== 'ADMIN' && role !== 'PRIVATE') return null;
   return user;
 }
 

@@ -1,11 +1,28 @@
 import { cache } from 'react';
 import { createClient } from './supabase';
 import { prisma } from './prisma';
+import { createAdminClient } from './supabase';
 
 export async function isAuthenticated() {
   const session = await getSession();
   if (!session) return null;
   return session;
+}
+
+/**
+ * Syncs the user's role from the DB into Supabase app_metadata.
+ * app_metadata is embedded in the JWT and readable in the proxy without extra DB calls.
+ * It can only be written by the service role — safe for auth decisions.
+ */
+export async function syncRoleToAppMetadata(userId: string, role: string): Promise<void> {
+  try {
+    const adminClient = createAdminClient();
+    await adminClient.auth.admin.updateUserById(userId, {
+      app_metadata: { role: role.toUpperCase() },
+    });
+  } catch (error) {
+    console.error('[syncRoleToAppMetadata] Failed to sync role:', error);
+  }
 }
 
 export const getSession = cache(async () => {
@@ -25,13 +42,10 @@ export const getSession = cache(async () => {
       select: { role: true, verified: true }
     });
 
-    // Map Supabase user and Prisma data to the expected payload structure
-    let role = dbUser?.role || user.user_metadata.role || 'USER';
-
-    // Emergency fallback for primary admin
-    if (user.email === 'eliasakry@gmail.com') {
-      role = 'ADMIN' as any;
-    }
+    // Priority: app_metadata.role (synced by service role on login) > DB role > user_metadata fallback
+    const appMetaRole = (user.app_metadata?.role as string | undefined)?.toUpperCase();
+    const dbRole = (dbUser?.role as string | undefined)?.toUpperCase();
+    let role: string = appMetaRole || dbRole || (user.user_metadata?.role as string | undefined)?.toUpperCase() || 'USER';
 
     return {
       id: user.id,

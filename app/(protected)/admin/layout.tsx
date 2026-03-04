@@ -1,7 +1,11 @@
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
 import Sidebar, { SidebarItem } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { getSession } from '@/lib/auth-utils';
+
+export const dynamic = 'force-dynamic';
 
 const items: SidebarItem[] = [
   {
@@ -35,6 +39,17 @@ const items: SidebarItem[] = [
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession();
+
+  if (!session) {
+    redirect('/login');
+  }
+
+  // Only ADMIN and PRIVATE roles can access admin routes
+  if (session.role !== 'ADMIN' && session.role !== 'PRIVATE') {
+    redirect('/signals');
+  }
+
   const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get('sidebar:state')?.value === 'true';
 

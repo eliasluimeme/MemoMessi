@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   try {
     const session = await isAuthenticated();
 
-    if (!session || session.role !== 'ADMIN')
+    if (!session || (session.role !== 'ADMIN' && session.role !== 'PRIVATE'))
       return new NextResponse('Unauthorized', { status: 403 });
 
     const body = await req.json();

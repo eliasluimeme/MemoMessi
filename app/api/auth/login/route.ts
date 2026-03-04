@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { syncRoleToAppMetadata } from '@/lib/auth-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,16 +21,19 @@ export async function POST(request: Request) {
 
     const { user } = data;
 
-    // Fetch role from database to ensure it's accurate
+    // Fetch role from database — source of truth
     const dbUser = await prisma.user.findUnique({
       where: { id: user.id },
     });
 
-    const role = dbUser?.role || user.user_metadata.role || 'USER';
+    const role = ((dbUser?.role as string) || (user.user_metadata.role as string) || 'USER').toUpperCase();
+
+    // Sync role into app_metadata so the proxy can read it from the JWT
+    await syncRoleToAppMetadata(user.id, role);
 
     return NextResponse.json({
       message: 'Login successful',
-      redirectUrl: role === 'ADMIN' ? '/admin' : '/signals',
+      redirectUrl: role === 'ADMIN' || role === 'PRIVATE' ? '/admin' : '/signals',
       user: {
         id: user.id,
         email: user.email,
