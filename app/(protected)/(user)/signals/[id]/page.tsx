@@ -1,8 +1,10 @@
 import { notFound, redirect } from 'next/navigation';
+import Link from 'next/link';
 
 import { SignalWithTargets } from '@/types/signal';
 import {
   AlertTriangle,
+  ChevronLeft,
   Copy,
   DollarSign,
   FileText,
@@ -57,7 +59,16 @@ export default async function SignalPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="container mx-auto max-w-[1200px] py-12 px-8">
-      <div className="flex flex-col gap-16">
+      <div className="flex flex-col gap-10">
+
+        {/* Back Navigation */}
+        <Link
+          href="/signals"
+          className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40 hover:text-foreground transition-colors duration-300 w-fit"
+        >
+          <ChevronLeft className="h-3 w-3" />
+          Back to Signals
+        </Link>
 
         {/* Superior Minimalist Header */}
         <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
