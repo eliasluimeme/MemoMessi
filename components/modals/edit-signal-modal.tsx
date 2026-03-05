@@ -3,10 +3,9 @@
 import { useEffect, useState } from 'react';
 
 import { SignalWithTargets } from '@/types/signal';
-import { Loader2, Plus, Save, X } from 'lucide-react';
+import { AlertTriangle, Loader2, Plus, Save, X, Zap } from 'lucide-react';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -65,9 +64,7 @@ const formDataSchema = z.object({
   takeProfit: z
     .array(z.object({ price: z.number(), gain: z.number() }))
     .min(1, 'At least one target is required')
-    .refine((targets) => {
-      return targets.every((t) => t.price > 0);
-    }, 'All targets must be greater than 0'),
+    .refine((targets) => targets.every((t) => t.price > 0), 'All targets must be greater than 0'),
   note: z.string().optional(),
 });
 
@@ -108,79 +105,93 @@ export function EditSignalModal({ isOpen, onClose, signal, onSuccess }: EditSign
     }
   }, [signal]);
 
-  const recalculateAllGains = (entryPrice: number, takeProfits: typeof formData.takeProfit) => {
-    return takeProfits.map((target: { price: string; gain: number }) => ({
+  const recalculateAllGains = (entryPrice: number, takeProfits: typeof formData.takeProfit) =>
+    takeProfits.map((target) => ({
       price: target.price,
       gain: Number(calculatePotentialGains(Number(target.price), entryPrice).toFixed(2)),
     }));
-  };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => {
-      const newState = {
-        ...prev,
-        [field]: field === 'stopLoss' && !value ? '' : value,
-      };
-
-      // Recalculate gains when entry price changes
-      if (field === 'entryZone' && value) {
+      const newState = { ...prev, [field]: field === 'stopLoss' && !value ? '' : value };
+      if (field === 'entryZone' && value && !isNaN(Number(value))) {
         newState.takeProfit = recalculateAllGains(Number(value), prev.takeProfit);
       }
-
       return newState;
     });
-
-    if (formErrors[field as keyof FormErrors]) {
+    if (formErrors[field as keyof FormErrors])
       setFormErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
   };
 
   const handleTakeProfitChange = (index: number, value: string) => {
     setFormData((prev) => {
-      const updatedTakeProfits = [...prev.takeProfit];
-      updatedTakeProfits[index] = {
+      const updated = [...prev.takeProfit];
+      updated[index] = {
         price: value,
         gain: Number(calculatePotentialGains(Number(value), Number(prev.entryZone)).toFixed(2)),
       };
-      return { ...prev, takeProfit: updatedTakeProfits };
+      return { ...prev, takeProfit: updated };
     });
+    if (formErrors.takeProfit) setFormErrors((prev) => ({ ...prev, takeProfit: undefined }));
+  };
 
-    if (formErrors.takeProfit) {
-      setFormErrors((prev) => ({ ...prev, takeProfit: undefined }));
+  const addTakeProfit = () => {
+    if (formData.takeProfit.length < 8) {
+      setFormData((prev) => ({
+        ...prev,
+        takeProfit: [...prev.takeProfit, { price: '', gain: 0 }],
+      }));
     }
+  };
+
+  const removeTakeProfit = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      takeProfit: prev.takeProfit.filter((_, i) => i !== index),
+    }));
+  };
+
+  const applySmartZones = () => {
+    const entry = Number(formData.entryZone);
+    if (!entry || isNaN(entry)) {
+      toast({ title: 'Error', description: 'Enter a valid entry price first.', variant: 'destructive' });
+      return;
+    }
+    const tp1 = entry * 1.05;
+    const tp2 = entry * 1.10;
+    const tp3 = entry * 1.20;
+    const sl  = entry * 0.90;
+    setFormData((prev) => ({
+      ...prev,
+      stopLoss: sl.toFixed(8).replace(/\.?0+$/, ''),
+      takeProfit: [
+        { price: tp1.toFixed(8).replace(/\.?0+$/, ''), gain: calculatePotentialGains(tp1, entry) },
+        { price: tp2.toFixed(8).replace(/\.?0+$/, ''), gain: calculatePotentialGains(tp2, entry) },
+        { price: tp3.toFixed(8).replace(/\.?0+$/, ''), gain: calculatePotentialGains(tp3, entry) },
+      ],
+    }));
+    toast({ title: 'Smart Zones Applied ⚡', description: 'TP1 (+5%), TP2 (+10%), TP3 (+20%), SL (-10%)' });
   };
 
   const validateInputs = (): boolean => {
     const errors: FormErrors = {};
     let isValid = true;
 
-    if (!formData.pair.trim()) {
-      errors.pair = 'Trading pair is required';
-      isValid = false;
-    }
+    if (!formData.pair.trim()) { errors.pair = 'Trading pair is required'; isValid = false; }
 
     const entryZoneNum = Number(formData.entryZone);
-    if (!entryZoneNum || entryZoneNum <= 0) {
-      errors.entryZone = 'Valid entry price is required';
-      isValid = false;
-    }
+    if (!entryZoneNum || entryZoneNum <= 0) { errors.entryZone = 'Valid entry price is required'; isValid = false; }
 
     const stopLossNum = Number(formData.stopLoss);
     if (formData.stopLoss && (isNaN(stopLossNum) || stopLossNum <= 0)) {
-      errors.stopLoss = 'Stop loss must be a valid number greater than 0';
-      isValid = false;
+      errors.stopLoss = 'Stop loss must be a valid number > 0'; isValid = false;
     }
-
     if (formData.stopLoss && stopLossNum >= entryZoneNum) {
-      errors.stopLoss = 'Stop loss must be less than entry price';
-      isValid = false;
+      errors.stopLoss = 'Stop loss must be less than entry price'; isValid = false;
     }
 
     const validTargets = formData.takeProfit.filter((t) => Number(t.price) > 0);
-    if (validTargets.length === 0) {
-      errors.takeProfit = ['At least one valid target is required'];
-      isValid = false;
-    }
+    if (validTargets.length === 0) { errors.takeProfit = ['At least one valid target is required']; isValid = false; }
 
     setFormErrors(errors);
     return isValid;
@@ -191,18 +202,12 @@ export function EditSignalModal({ isOpen, onClose, signal, onSuccess }: EditSign
     setIsSubmitting(true);
     setSubmitError(null);
 
-    if (!validateInputs()) {
-      setIsSubmitting(false);
-      return;
-    }
+    if (!validateInputs()) { setIsSubmitting(false); return; }
 
     try {
       const validTargets = formData.takeProfit
         .filter((t) => Number(t.price) > 0)
-        .map((t) => ({
-          price: Number(t.price),
-          gain: t.gain,
-        }));
+        .map((t) => ({ price: Number(t.price), gain: t.gain }));
 
       const formDataValidated = formDataSchema.parse({
         ...formData,
@@ -223,153 +228,180 @@ export function EditSignalModal({ isOpen, onClose, signal, onSuccess }: EditSign
       }
 
       const updated: SignalWithTargets = await response.json();
-      toast({
-        title: 'Success',
-        description: 'Signal updated successfully!',
-      });
+      toast({ title: 'Success', description: 'Signal updated successfully!' });
       onSuccess?.(updated);
       onClose();
     } catch (error) {
-      console.error({ error });
       setSubmitError(error instanceof Error ? error.message : 'Failed to update signal');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const addTakeProfit = () => {
-    if (formData.takeProfit.length < 8) {
-      setFormData((prev) => ({
-        ...prev,
-        takeProfit: [...prev.takeProfit, { price: '', gain: 0 }],
-      }));
-    }
-  };
-
-  const removeTakeProfit = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      takeProfit: prev.takeProfit.filter((_, i) => i !== index),
-    }));
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] max-w-xl overflow-hidden p-0">
-        <DialogHeader className="border-b bg-background p-6">
-          <DialogTitle>Edit Signal</DialogTitle>
-          <DialogDescription>Modify the signal details.</DialogDescription>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-hidden p-0 border dark:border-white/[0.08] border-border/60 dark:bg-[#0a0a0a] bg-background rounded-2xl shadow-2xl">
+
+        {/* Header */}
+        <DialogHeader className="border-b dark:border-white/[0.06] border-border/50 px-6 py-5">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl dark:bg-primary/10 bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Save className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <DialogTitle className="text-base font-semibold tracking-tight text-foreground">
+                Edit Signal
+              </DialogTitle>
+              <DialogDescription className="text-xs dark:text-muted-foreground/50 text-muted-foreground/70 mt-0.5 font-light">
+                Update signal parameters — changes broadcast immediately.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 max-h-[calc(90vh-8rem)] overflow-y-auto">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-8 p-6">
-            <div className="grid grid-cols-2 gap-6">
+        <div className="max-h-[calc(90vh-5.5rem)] overflow-y-auto scrollbar-hide">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5 p-6">
+
+            {/* Pair + Direction */}
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <p className="text-sm font-medium">Trading Pair</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Trading Pair</p>
                 <Input
-                  placeholder="e.g., BTC/USDT"
+                  placeholder="e.g., SOL/USDT"
                   value={formData.pair}
                   onChange={(e) => handleInputChange('pair', e.target.value)}
                   error={formErrors.pair}
+                  className="h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm"
                 />
               </div>
-
               <div className="space-y-2">
-                <p className="text-sm font-medium">Action</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Direction</p>
                 <Select
                   value={formData.action.toLowerCase()}
-                  onValueChange={(value: string) =>
-                    handleInputChange('action', value.toUpperCase())
-                  }
+                  onValueChange={(value) => handleInputChange('action', value.toUpperCase())}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select action" />
+                  <SelectTrigger className="h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm">
+                    <SelectValue placeholder="Select direction" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="buy">Buy</SelectItem>
-                    <SelectItem value="sell">Sell</SelectItem>
+                  <SelectContent className="rounded-xl dark:border-white/[0.08] border-border/60">
+                    <SelectItem value="buy">
+                      <span className="flex items-center gap-2 text-emerald-500 font-semibold">Long / Buy</span>
+                    </SelectItem>
+                    <SelectItem value="sell">
+                      <span className="flex items-center gap-2 text-rose-500 font-semibold">Short / Sell</span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            {/* Market */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Market Type</p>
+              <Select
+                value={formData.market}
+                onValueChange={(value) => handleInputChange('market', value)}
+              >
+                <SelectTrigger className="h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm">
+                  <SelectValue placeholder="Select market" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl dark:border-white/[0.08] border-border/60">
+                  <SelectItem value="SPOT">Spot</SelectItem>
+                  <SelectItem value="FUTURES">Futures</SelectItem>
+                  <SelectItem value="MARGIN">Margin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Entry + Stop Loss */}
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <p className="text-sm font-medium">Entry Price</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Entry Price</p>
+                  <button
+                    type="button"
+                    onClick={applySmartZones}
+                    className="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider text-blue-500 hover:text-blue-400 transition-colors"
+                  >
+                    <Zap className="h-2.5 w-2.5" /> Auto Zones
+                  </button>
+                </div>
                 <Input
                   type="text"
                   inputMode="decimal"
-                  placeholder="Entry Price"
+                  placeholder="0.000000"
                   value={formData.entryZone}
                   onChange={(e) => handleInputChange('entryZone', e.target.value)}
                   error={formErrors.entryZone}
+                  className="h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm font-mono"
                 />
               </div>
-
               <div className="space-y-2">
-                <p className="text-sm font-medium">Stop Loss (Optional)</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">
+                  Stop Loss <span className="normal-case tracking-normal font-normal dark:text-white/20 text-muted-foreground/50">(optional)</span>
+                </p>
                 <Input
                   type="text"
                   inputMode="decimal"
-                  placeholder="Optional"
+                  placeholder="0.000000"
                   value={formData.stopLoss}
                   onChange={(e) => handleInputChange('stopLoss', e.target.value)}
                   error={formErrors.stopLoss}
+                  className="h-10 rounded-lg dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm font-mono"
                 />
               </div>
             </div>
 
-            <div className="space-y-6">
+            {/* Take Profit Targets */}
+            <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium">Take Profit Targets</p>
-                  <p className="text-xs text-muted-foreground">At least 1 target required</p>
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Take Profit Targets</p>
+                  <p className="text-[10px] dark:text-white/20 text-muted-foreground/50 mt-0.5">At least 1 target required</p>
                 </div>
-                <Button
+                <button
                   type="button"
                   onClick={addTakeProfit}
-                  variant="outline"
-                  size="sm"
                   disabled={formData.takeProfit.length >= 8}
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-lg border dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background dark:text-white/40 text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider hover:dark:border-white/[0.15] hover:border-border transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  <Plus className="size-4" />
-                  Add Target
-                </Button>
+                  <Plus className="h-3 w-3" /> Add Target
+                </button>
               </div>
-              <div className="grid grid-cols-2 gap-6 md:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                 {formData.takeProfit.map((profit, index) => (
-                  <div key={index} className="relative space-y-2">
+                  <div
+                    key={index}
+                    className="relative rounded-xl border dark:border-white/[0.06] border-border/50 dark:bg-white/[0.02] bg-muted/20 p-3 space-y-2"
+                  >
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium text-muted-foreground">
-                        Target {index + 1}
+                      <p className="text-[9px] font-black uppercase tracking-widest dark:text-white/25 text-muted-foreground/50">
+                        TP {index + 1}
                       </p>
                       {Number(profit.price) > 0 && (
-                        <p
-                          className={`text-xs font-medium ${profit.gain >= 0 ? 'text-emerald-500' : 'text-red-500'}`}
-                        >
-                          {profit.gain.toFixed(2)}%
-                        </p>
+                        <span className={`text-[10px] font-bold tabular-nums ${profit.gain >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {profit.gain >= 0 ? '+' : ''}{profit.gain.toFixed(2)}%
+                        </span>
                       )}
                     </div>
                     <div className="relative">
                       <Input
                         type="text"
                         inputMode="decimal"
-                        placeholder={`Target ${index + 1}`}
+                        placeholder="Price"
                         value={profit.price}
                         onChange={(e) => handleTakeProfitChange(index, e.target.value)}
                         error={formErrors.takeProfit?.[index]}
+                        className={`h-9 rounded-lg dark:border-white/[0.06] border-border/50 dark:bg-white/[0.02] bg-background text-sm font-mono ${index > 0 ? 'pr-8' : ''}`}
                       />
                       {index > 0 && (
-                        <Button
+                        <button
                           type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-2 top-1/2 size-6 -translate-y-1/2 rounded-full hover:bg-destructive hover:text-destructive-foreground"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center rounded-md dark:text-white/20 text-muted-foreground/40 hover:text-rose-500 transition-colors"
                           onClick={() => removeTakeProfit(index)}
                         >
-                          <X className="size-3" />
-                        </Button>
+                          <X className="h-3 w-3" />
+                        </button>
                       )}
                     </div>
                   </div>
@@ -377,41 +409,46 @@ export function EditSignalModal({ isOpen, onClose, signal, onSuccess }: EditSign
               </div>
             </div>
 
+            {/* Note */}
             <div className="space-y-2">
-              <p className="text-sm font-medium">Analysis & Notes</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">
+                Analysis & Note <span className="normal-case tracking-normal font-normal dark:text-white/20 text-muted-foreground/50">(optional)</span>
+              </p>
               <Textarea
                 placeholder="Add your technical analysis and important note here..."
                 value={formData.note}
                 onChange={(e) => handleInputChange('note', e.target.value)}
-                className="min-h-[100px]"
+                className="min-h-[80px] rounded-xl dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm resize-none"
               />
-              {submitError && <p className="text-sm text-destructive">{submitError}</p>}
+              {submitError && (
+                <div className="flex items-center gap-2 text-[11px] text-rose-500 font-medium mt-1">
+                  <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+                  {submitError}
+                </div>
+              )}
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
+            {/* Footer */}
+            <div className="flex justify-end gap-3 pt-4 border-t dark:border-white/[0.06] border-border/50">
+              <button
                 type="button"
-                variant="outline"
                 onClick={onClose}
-                className="w-full"
                 disabled={isSubmitting}
+                className="h-10 px-5 rounded-xl border dark:border-white/[0.08] border-border/60 dark:bg-white/[0.02] bg-background text-sm dark:text-white/60 text-muted-foreground hover:dark:bg-white/[0.05] hover:bg-muted/50 transition-all disabled:opacity-40"
               >
-                <X className="size-4" />
                 Cancel
-              </Button>
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="h-10 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-semibold flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
                 {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                    Updating...
-                  </>
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Saving...</>
                 ) : (
-                  <>
-                    <Save className="mr-2 size-4" />
-                    Save Changes
-                  </>
+                  <><Save className="h-4 w-4" /> Save Changes</>
                 )}
-              </Button>
+              </button>
             </div>
           </form>
         </div>
