@@ -15,8 +15,6 @@
     "setup-webhook": "ts-node scripts/setup-telegram-webhook.ts"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.4",
-    "@prisma/adapter-neon": "^6.19.2",
     "@radix-ui/react-alert-dialog": "^1.1.2",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.2",
@@ -65,7 +63,6 @@
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "ws": "^8.18.0",
     "zod": "^3.23.8",
     "zustand": "^5.0.2"
   },
@@ -78,7 +75,6 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/socket.io-client": "^1.4.36",
-    "@types/ws": "^8.5.13",
     "bufferutil": "^4.0.8",
     "eslint": "^9",
     "eslint-config-next": "^16.1.6",

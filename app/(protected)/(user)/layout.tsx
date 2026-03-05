@@ -4,10 +4,12 @@ import { redirect } from 'next/navigation';
 import Sidebar, { SidebarItem } from '@/components/sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { getSession } from '@/lib/auth-utils';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 import Navbar from './_components/navbar';
+import { UserHydrator } from './_components/user-hydrator';
 
 const items: SidebarItem[] = [
   {
@@ -47,11 +49,17 @@ export default async function AuthenticatedLayout({ children }: { children: Reac
     redirect('/login');
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: session.id as string },
+    include: { subscriptions: true },
+  });
+
   const cookieStore = await cookies();
   const sidebarOpen = cookieStore.get('sidebar:state')?.value === 'true';
 
   return (
     <SidebarProvider defaultOpen={sidebarOpen}>
+      {user && <UserHydrator user={user} />}
       <Sidebar items={items} />
       <SidebarInset className="relative ml-0 overflow-hidden bg-background">
         {/* Superior Minimalist Background */}

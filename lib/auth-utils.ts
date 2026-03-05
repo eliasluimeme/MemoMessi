@@ -1,6 +1,5 @@
-import { cache } from 'react';
 import { createClient } from './supabase';
-import { prisma } from './prisma';
+import { prisma, withRetry } from './prisma';
 import { createAdminClient } from './supabase';
 
 export async function isAuthenticated() {
@@ -25,7 +24,7 @@ export async function syncRoleToAppMetadata(userId: string, role: string): Promi
   }
 }
 
-export const getSession = cache(async () => {
+export async function getSession() {
   const supabase = await createClient();
 
   try {
@@ -37,10 +36,12 @@ export const getSession = cache(async () => {
 
     // Fetch the latest role and verified status from the database
     // This is more reliable than user_metadata which can get out of sync
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { role: true, verified: true }
-    });
+    const dbUser = await withRetry(() =>
+      prisma.user.findUnique({
+        where: { id: user.id },
+        select: { role: true, verified: true }
+      })
+    );
 
     // Priority: app_metadata.role (synced by service role on login) > DB role > user_metadata fallback
     const appMetaRole = (user.app_metadata?.role as string | undefined)?.toUpperCase();
@@ -57,4 +58,4 @@ export const getSession = cache(async () => {
     console.error('Error fetching user:', error);
     return null;
   }
-});
+}

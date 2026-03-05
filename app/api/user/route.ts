@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, withRetry } from '@/lib/prisma';
 import { getSession } from '@/lib/auth-utils';
 import { z } from 'zod';
 
@@ -30,12 +30,12 @@ export async function GET() {
     if (!session?.email)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const user = await prisma.user.findUnique({
-      where: { email: session.email as string },
-      include: {
-        subscriptions: true,
-      },
-    });
+    const user = await withRetry(() =>
+      prisma.user.findUnique({
+        where: { email: session.email as string },
+        include: { subscriptions: true },
+      })
+    );
 
     if (!user)
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -82,13 +82,13 @@ export async function PATCH(req: Request) {
         { status: 400 }
       );
 
-    const updatedUser = await prisma.user.update({
-      where: { email: session.email as string },
-      data: result.data,
-      include: {
-        subscriptions: true,
-      },
-    });
+    const updatedUser = await withRetry(() =>
+      prisma.user.update({
+        where: { email: session.email as string },
+        data: result.data,
+        include: { subscriptions: true },
+      })
+    );
 
     const response: UserResponse = {
       id: updatedUser.id,

@@ -1,25 +1,29 @@
 import { SignalWithTargets } from '@/types/signal';
-import { prisma } from '@/lib/prisma';
+import { prisma, withRetry } from '@/lib/prisma';
 import SignalCard from './signal-card-compact';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 export async function SignalFeed() {
-    const latestSignals = await prisma.signal.findMany({
-        take: 3,
-        orderBy: {
-            createdAt: 'desc',
-        },
-        include: {
-            targets: {
-                orderBy: {
-                    number: 'asc',
+    let latestSignals: SignalWithTargets[] = [];
+    let error = false;
+
+    try {
+        latestSignals = await withRetry(() =>
+            prisma.signal.findMany({
+                take: 3,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    targets: { orderBy: { number: 'asc' } },
+                    favorites: true,
                 },
-            },
-            favorites: true,
-        },
-    });
+            })
+        ) as SignalWithTargets[];
+    } catch (e) {
+        console.error('[SignalFeed] DB error:', e);
+        error = true;
+    }
 
     return (
         <div className="space-y-8">
@@ -35,7 +39,11 @@ export async function SignalFeed() {
                 </Button>
             </div>
             <div className="flex flex-col gap-6">
-                {latestSignals.length === 0 ? (
+                {error ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-muted/20 rounded-[32px] border border-dashed border-border/50">
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50">Unable to load signals — connection error</span>
+                    </div>
+                ) : latestSignals.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 bg-muted/20 rounded-[32px] border border-dashed border-border/50">
                         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/50">No active signals detected</span>
                     </div>

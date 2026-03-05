@@ -39,13 +39,31 @@ export default function ProfilePage() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch('/api/user');
-        if (!res.ok) throw new Error('Failed to fetch user data');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+
+        const res = await fetch('/api/user', { signal: controller.signal });
+        clearTimeout(timeout);
+
+        if (res.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body?.error || `Server error (${res.status})`);
+        }
         const data = await res.json();
         setUserData(data);
       } catch (err) {
-        setError('Failed to load profile');
-        console.error(err);
+        const msg =
+          err instanceof DOMException && err.name === 'AbortError'
+            ? 'Request timed out — please refresh'
+            : err instanceof Error
+            ? err.message
+            : 'Failed to load profile';
+        setError(msg);
+        console.error('[ProfilePage] fetchUser error:', err);
       } finally {
         setIsLoading(false);
       }
