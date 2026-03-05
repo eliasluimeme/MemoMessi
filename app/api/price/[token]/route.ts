@@ -1,15 +1,65 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+/** Native currency symbol per DexScreener chain ID */
+const NATIVE_SYMBOL: Record<string, string> = {
+  solana: 'SOL',
+  ethereum: 'ETH',
+  bsc: 'BNB',
+  base: 'ETH',
+  arbitrum: 'ETH',
+  polygon: 'MATIC',
+  avalanche: 'AVAX',
+};
+
+/** Pick the highest-liquidity pair from a DexScreener pairs array */
+function bestPair(pairs: any[]): any | null {
+  if (!pairs?.length) return null;
+  return pairs
+    .filter((p: any) => p?.priceUsd)
+    .sort((a: any, b: any) => (b?.liquidity?.usd ?? 0) - (a?.liquidity?.usd ?? 0))[0] ?? null;
+}
+
+/** Build a price response from a DexScreener pair object */
+function pairToPrice(symbol: string, pair: any) {
+  const nativeSymbol = NATIVE_SYMBOL[pair.chainId] ?? null;
+  return {
+    symbol,
+    price: pair.priceUsd,
+    ...(nativeSymbol && pair.priceNative
+      ? { priceNative: pair.priceNative, nativeSymbol }
+      : {}),
+  };
+}
 
 export async function GET(
-  _request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ token: string }> },
 ) {
   const { token } = await params;
   const upperToken = token.toUpperCase();
-  const symbol = `${upperToken}USDT`;
+  const { searchParams } = request.nextUrl;
+  const contractAddress = searchParams.get('ca');
 
   try {
-    // 1. Try Binance first
+    // 1. If a contract address is provided → fetch DexScreener token endpoint directly.
+    //    This is the most accurate source and returns priceNative (SOL/ETH/etc).
+    if (contractAddress) {
+      const dexRes = await fetch(
+        `https://api.dexscreener.com/latest/dex/tokens/${contractAddress}`,
+        { next: { revalidate: 0 } },
+      );
+
+      if (dexRes.ok) {
+        const dexData = await dexRes.json();
+        const pair = bestPair(dexData?.pairs ?? []);
+        if (pair) {
+          return NextResponse.json(pairToPrice(upperToken, pair));
+        }
+      }
+    }
+
+    // 2. Try Binance (CEX tokens like BTC, ETH, SOL)
+    const symbol = `${upperToken}USDT`;
     const binanceRes = await fetch(
       `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`,
       { next: { revalidate: 0 } },
@@ -17,10 +67,10 @@ export async function GET(
 
     if (binanceRes.ok) {
       const data = await binanceRes.json();
-      return NextResponse.json(data);
+      if (data?.price) return NextResponse.json(data);
     }
 
-    // 2. Fallback: DexScreener (handles non-Binance / Solana tokens)
+    // 3. Fallback: DexScreener symbol search (least accurate — only when no CA)
     const dexRes = await fetch(
       `https://api.dexscreener.com/latest/dex/search?q=${upperToken}`,
       { next: { revalidate: 0 } },
@@ -30,24 +80,16 @@ export async function GET(
       const dexData = await dexRes.json();
       const pairs: any[] = dexData?.pairs ?? [];
 
-      // Find the pair whose baseToken symbol matches (case-insensitive), pick highest liquidity
-      const matched = pairs
-        .filter(
-          (p: any) =>
-            p?.baseToken?.symbol?.toUpperCase() === upperToken &&
-            p?.priceUsd,
-        )
-        .sort((a: any, b: any) => (b?.liquidity?.usd ?? 0) - (a?.liquidity?.usd ?? 0));
+      const matched = pairs.filter(
+        (p: any) => p?.baseToken?.symbol?.toUpperCase() === upperToken && p?.priceUsd,
+      );
 
-      if (matched.length > 0) {
-        return NextResponse.json({
-          symbol: upperToken,
-          price: matched[0].priceUsd,
-        });
+      const pair = bestPair(matched);
+      if (pair) {
+        return NextResponse.json(pairToPrice(upperToken, pair));
       }
     }
 
-    // 3. Nothing worked
     return NextResponse.json(
       { error: `Price not found for ${upperToken}` },
       { status: 404 },

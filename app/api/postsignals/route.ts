@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { telegramService } from '@/lib/telegram';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth-utils';
+import { getSwapLinks } from '@/lib/utils/chain-utils';
 
 export async function POST(request: Request) {
   try {
@@ -39,19 +40,32 @@ export async function POST(request: Request) {
       },
     });
 
+    // Build multi-platform Telegram keyboard (max 2 buttons per row)
+    const swapLinks = getSwapLinks(signal.network, signal.contractAddress);
+    const emojiMap: Record<string, string> = {
+      Jupiter: '⚡️',
+      Raydium: '🌊',
+      Orca: '🐋',
+      Uniswap: '🦄',
+      'Jumper (LI.FI)': '🌉',
+      '1inch': '🗡️',
+      DexScreener: '📊',
+    };
+    const telegramButtons = swapLinks.map((link) => ({
+      text: `${emojiMap[link.name] ?? '🔗'} ${link.name}`,
+      url: link.url,
+    }));
+    const keyboard: { text: string; url: string }[][] = [];
+    for (let i = 0; i < telegramButtons.length; i += 2) {
+      keyboard.push(telegramButtons.slice(i, i + 2));
+    }
+
     // Format and send Telegram notification
     const telegramMessage = formatSignalMessage(signal);
     await telegramService.sendToSubscribers(telegramMessage, {
-      inline_keyboard: [
-        [
-          {
-            text: '⚡️ Trade Now',
-            url: signal.network === 'solana'
-              ? `https://jup.ag/swap/SOL-${signal.contractAddress}`
-              : `https://app.uniswap.org/#/swap?outputCurrency=${signal.contractAddress}&chain=${signal.network || 'base'}`
-          }
-        ]
-      ]
+      inline_keyboard: keyboard.length > 0 ? keyboard : [
+        [{ text: '⚡️ Trade Now', url: `https://jup.ag/swap/SOL-${signal.contractAddress || ''}` }],
+      ],
     });
 
     return NextResponse.json(signal, { status: 201 });

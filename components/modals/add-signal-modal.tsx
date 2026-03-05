@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/toast-context';
+import { GECKO_NETWORK, isSolanaNetwork } from '@/lib/utils/chain-utils';
 
 interface FormData {
   contractAddress: string;
@@ -190,9 +191,10 @@ export default function AddSignalModal({
     setRugCheckScore(null);
 
     try {
-      // 1. Fetch token data from GeckoTerminal
+      // 1. Fetch token data from GeckoTerminal (use normalized network slug)
+      const geckoNetwork = GECKO_NETWORK[formData.network] ?? formData.network;
       const geckoRes = await fetch(
-        `https://api.geckoterminal.com/api/v2/networks/${formData.network}/tokens/${formData.contractAddress}`
+        `https://api.geckoterminal.com/api/v2/networks/${geckoNetwork}/tokens/${formData.contractAddress}`
       );
       const data = await geckoRes.json();
 
@@ -224,7 +226,7 @@ export default function AddSignalModal({
       });
 
       // 3. Optional: Fetch RugCheck for Solana
-      if (formData.network === 'solana') {
+      if (isSolanaNetwork(formData.network)) {
         fetch(`https://api.rugcheck.xyz/v1/tokens/${formData.contractAddress}/report/summary`)
           .then((res) => res.json())
           .then((rug) => {

@@ -1,10 +1,13 @@
 import { getUserAnalytics } from '@/actions/analytics';
 import AnalyticsCards from '@/app/(protected)/admin/_components/analytics-cards';
+import { MotionContainer, MotionItem } from '@/components/motion-container';
 
 import { prisma } from '@/lib/prisma';
 
 import UsersTable from './_components/table';
 import { UsersHeader } from './_components/users-header';
+
+export const dynamic = 'force-dynamic';
 
 async function getUsers() {
   try {
@@ -52,11 +55,29 @@ export default async function UserManagement() {
 
   return (
     <div className="container mx-auto py-12 px-6 md:px-12 max-w-[1400px]">
-      <div className="space-y-12">
-        <UsersHeader />
-        <AnalyticsCards analytics={analytics} />
-        <UsersTable users={users} />
-      </div>
+      <MotionContainer className="space-y-12">
+        <MotionItem>
+          <UsersHeader />
+        </MotionItem>
+
+        <MotionItem>
+          <div className="space-y-3">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+              User Analytics
+            </p>
+            <AnalyticsCards analytics={analytics} />
+          </div>
+        </MotionItem>
+
+        <MotionItem>
+          <div className="space-y-3">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+              Operator Registry
+            </p>
+            <UsersTable users={users} />
+          </div>
+        </MotionItem>
+      </MotionContainer>
     </div>
   );
 }

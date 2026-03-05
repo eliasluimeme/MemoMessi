@@ -121,7 +121,7 @@
   }
 
   .glass-border {
-    @apply border dark:border-white/[0.03] border-border/40 dark:bg-white/[0.01] bg-background/60;
+    @apply border dark:border-white/[0.03] border-border/50 dark:bg-white/[0.01] bg-background/80;
   }
 
   .glass-card {

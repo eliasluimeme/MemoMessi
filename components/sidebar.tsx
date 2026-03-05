@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { useLogout } from '@/hooks/useLogout';
+import useUserStore from '@/store/user';
 import * as LucideIcons from 'lucide-react';
-import { LogOut, LucideIcon } from 'lucide-react';
+import { LogOut, LucideIcon, ShieldCheck, User2 } from 'lucide-react';
 
 import ThemeToggler from '@/components/theme-toggler';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,9 @@ export default function Sidebar({ items }: { items: SidebarItem[] }) {
   const pathname = usePathname();
   const { logout } = useLogout();
   const { setOpenMobile } = useSidebar();
+  const user = useUserStore((state) => state.user);
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'PRIVATE';
+  const isOnAdminRoute = pathname.startsWith('/admin');
 
   const handleItemClick = () => {
     setOpenMobile(false);
@@ -116,6 +120,33 @@ export default function Sidebar({ items }: { items: SidebarItem[] }) {
 
       <SidebarFooter className="p-4 mt-auto group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pb-4">
         <div className="flex flex-col gap-2 rounded-[28px] dark:bg-white/[0.02] dark:border-white/[0.03] bg-muted/30 border border-border/40 p-2">
+          {isAdmin && (
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  size="lg"
+                  tooltip={isOnAdminRoute ? 'User View' : 'Admin Panel'}
+                  className="rounded-2xl text-muted-foreground/40 hover:text-primary hover:bg-primary/5 transition-all duration-500 group-data-[collapsible=icon]:justify-center"
+                >
+                  <Link
+                    href={isOnAdminRoute ? '/dashboard' : '/admin'}
+                    onClick={handleItemClick}
+                    className="flex items-center gap-4 px-4 group-data-[collapsible=icon]:px-0"
+                  >
+                    {isOnAdminRoute ? (
+                      <User2 className="h-5 w-5 shrink-0" />
+                    ) : (
+                      <ShieldCheck className="h-5 w-5 shrink-0" />
+                    )}
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] group-data-[collapsible=icon]:hidden">
+                      {isOnAdminRoute ? 'User View' : 'Admin Panel'}
+                    </span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          )}
           <ThemeToggler />
           <SidebarMenu>
             <SidebarMenuItem>

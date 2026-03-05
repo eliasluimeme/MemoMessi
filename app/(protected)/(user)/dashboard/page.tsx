@@ -18,7 +18,7 @@ export default function Dashboard() {
             <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground">
               Overview
             </h1>
-            <p className="text-muted-foreground/60 text-sm md:text-base font-light tracking-wide leading-relaxed">
+            <p className="text-muted-foreground/70 text-sm md:text-base font-light tracking-wide leading-relaxed">
               Institutional-grade market intelligence and real-time signal verification for elite operators.
             </p>
           </div>

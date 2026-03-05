@@ -27,17 +27,17 @@ export default function SignalCardCompact({ signal }: { signal: SignalWithTarget
 
     return (
         <Link href={`/signals/${signal.id}`} className="group block h-full">
-            <div className="relative flex flex-col h-full rounded-2xl border border-white/[0.06] bg-[#0a0a0a] backdrop-blur-xl p-5 gap-4 transition-all duration-300 hover:border-white/[0.1] hover:-translate-y-0.5 overflow-hidden">
+            <div className="relative flex flex-col h-full rounded-2xl border border-border/60 dark:border-white/[0.06] bg-card/60 dark:bg-[#0a0a0a2d] backdrop-blur-xl p-5 gap-4 transition-all duration-300 hover:border-border dark:hover:border-white/[0.1] hover:-translate-y-0.5 overflow-hidden">
 
                 {/* Header */}
                 <div className="flex items-center gap-3">
                     <TokenImage token={base} className="h-9 w-9 rounded-xl flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                         <div className="flex items-baseline gap-1 leading-none">
-                            <span className="text-[15px] font-bold tracking-tight text-white truncate">{base}</span>
-                            <span className="text-[11px] text-white/20">/{quote}</span>
+                            <span className="text-[15px] font-bold tracking-tight text-foreground truncate">{base}</span>
+                            <span className="text-[11px] text-muted-foreground/50">/{quote}</span>
                         </div>
-                        <p className="text-[10px] text-white/30 mt-0.5">{signal.network ?? 'Solana'} · {signal.market}</p>
+                        <p className="text-[10px] text-muted-foreground/50 mt-0.5">{signal.network ?? 'Solana'} · {signal.market}</p>
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                         {isBuy
@@ -50,23 +50,23 @@ export default function SignalCardCompact({ signal }: { signal: SignalWithTarget
                 </div>
 
                 {/* Status badge */}
-                <div className={cn(
+                {/* <div className={cn(
                     'inline-flex self-start items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border',
                     st.color
                 )}>
                     <span className={cn('h-1.5 w-1.5 rounded-full', st.dot)} />
                     {st.label}
-                </div>
+                </div> */}
 
                 {/* Prices */}
-                <div className="flex justify-between items-end border-t border-white/[0.04] pt-3">
+                <div className="flex justify-between items-end border-t border-border/50 pt-3">
                     <div>
-                        <p className="text-[9px] uppercase tracking-widest text-white/20 mb-1.5">Entry</p>
-                        <p className="font-mono text-[15px] font-bold text-white/80 leading-none">${signal.entryZone}</p>
+                        <p className="text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1.5">Entry</p>
+                        <p className="font-mono text-[15px] font-bold text-foreground leading-none">${signal.entryZone}</p>
                     </div>
                     {lastTarget && (
                         <div className="text-right">
-                            <p className="text-[9px] uppercase tracking-widest text-white/20 mb-1.5">Final Target</p>
+                            <p className="text-[9px] uppercase tracking-widest text-muted-foreground/60 mb-1.5">Final Target</p>
                             <p className="font-mono text-[15px] font-bold text-emerald-400 leading-none">
                                 ${lastTarget.price.toFixed(4).replace(/\.?0+$/, '')}
                             </p>
@@ -80,13 +80,13 @@ export default function SignalCardCompact({ signal }: { signal: SignalWithTarget
                         {signal.targets.map((t, i) => (
                             <div key={i} className={cn(
                                 'flex-1 h-full rounded-full transition-all duration-700',
-                                t.hit ? 'bg-emerald-400' : 'bg-white/[0.06]'
+                                t.hit ? 'bg-emerald-400' : 'bg-muted-foreground/20'
                             )} style={{ transitionDelay: `${i * 60}ms` }} />
                         ))}
                     </div>
                     <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-white/20">{hitsCount}/{signal.targets.length} targets</span>
-                        <span className="flex items-center gap-1 text-[10px] text-white/20">
+                        <span className="text-[10px] text-muted-foreground/60">{hitsCount}/{signal.targets.length} targets</span>
+                        <span className="flex items-center gap-1 text-[10px] text-muted-foreground/60">
                             <Clock className="h-2.5 w-2.5" />
                             {formatDistanceToNow(new Date(signal.createdAt))} ago
                         </span>

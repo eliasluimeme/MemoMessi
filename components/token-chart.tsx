@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 import { cn } from '@/lib/utils';
+import { isMemeNetwork, getExplorerUrl, DEXSCREENER_NETWORK } from '@/lib/utils/chain-utils';
 
 import { TokenImage } from './token-image';
 
@@ -79,10 +80,12 @@ export default function TradingViewChart({
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const isMeme = network === 'solana' || network === 'base' || network === 'ethereum';
+  const isMeme = isMemeNetwork(network);
+  const isSolana = network === 'solana' || network === 'sol';
+  const dexNetwork = DEXSCREENER_NETWORK[network] ?? network;
   const dexScreenerUrl =
     isMeme && contractAddress
-      ? `https://dexscreener.com/${network}/${contractAddress}?embed=1&theme=dark&trades=0&info=0`
+      ? `https://dexscreener.com/${dexNetwork}/${contractAddress}?embed=1&theme=dark&trades=0&info=0${isSolana ? '&quoteToken=sol' : ''}`
       : null;
 
   const loadTradingViewScript = useCallback(() => {
@@ -140,18 +143,12 @@ export default function TradingViewChart({
                   <h3 className="text-2xl font-bold tracking-tight">{pair}</h3>
                 </div>
                 <span className="text-muted-foreground">•</span>
-                <CurrentPrice token={token} />
+                <CurrentPrice token={token} contractAddress={contractAddress} network={network} />
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" asChild title="View on Explorer">
                   <Link
-                    href={
-                      network === 'solana'
-                        ? `https://solscan.io/token/${contractAddress}`
-                        : network === 'binance'
-                          ? `https://www.binance.com/en/trade/${pair.replace('/', '_')}`
-                          : `https://dexscreener.com/${network}/${contractAddress}`
-                    }
+                    href={getExplorerUrl(network, contractAddress, pair)}
                     target="_blank"
                   >
                     <Globe className="h-4 w-4" />
@@ -203,7 +200,7 @@ export default function TradingViewChart({
             isFullscreen ? 'flex-row' : 'flex-col',
           )}
         >
-          <Badge
+          {/* <Badge
             variant={
               status === 'WITHIN_ENTRY_ZONE'
                 ? 'success-outline'
@@ -215,7 +212,7 @@ export default function TradingViewChart({
             size={isFullscreen ? 'lg' : 'md'}
           >
             {Astatus[status as keyof typeof Astatus]}
-          </Badge>
+          </Badge> */}
           <Button variant="outline" onClick={handleFullscreen} size="icon">
             {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
