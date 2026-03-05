@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import Sidebar, { SidebarItem } from '@/components/sidebar';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { getSession } from '@/lib/auth-utils';
 
 export const dynamic = 'force-dynamic';
@@ -61,6 +61,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="pointer-events-none absolute left-0 right-0 top-0 -z-10 h-[500px] w-full bg-gradient-to-b from-primary/5 via-transparent to-transparent opacity-50 blur-3xl" />
 
         <div className="relative z-10 flex h-full flex-col">
+          <header className="sticky top-0 z-50 flex h-20 shrink-0 items-center bg-transparent px-8 transition-all duration-300">
+            <SidebarTrigger className="-ml-2 h-10 w-10 text-muted-foreground/40 hover:text-foreground transition-all duration-500" />
+          </header>
           <div className="flex flex-1 flex-col gap-4 px-2 py-6 md:p-4 md:py-8">{children}</div>
         </div>
       </SidebarInset>

@@ -31,9 +31,9 @@ export default async function AdminDashboard() {
         {/* ── Header ─────────────────────────────────────────────── */}
         <MotionItem className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-border/40">
           <div className="space-y-4 max-w-xl">
-            <div className="flex items-center gap-4">
+            {/* <div className="flex items-center gap-4">
               <SidebarTrigger className="-ml-2 h-10 w-10 rounded-xl border-border/40 bg-secondary/50 hover:bg-secondary transition-colors" />
-            </div>
+            </div> */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-[10px] uppercase tracking-widest font-semibold border border-amber-500/20">
               <Flame className="h-3 w-3" />
               Degen Command Center
