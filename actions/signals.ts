@@ -6,6 +6,67 @@ import { getSession } from '@/lib/auth-utils';
 import { getHighLowPrices } from '@/lib/binance';
 import { prisma } from '@/lib/prisma';
 
+/** Fetch current price from our price API (uses DexScreener for non-Binance tokens) */
+async function getDexPrice(signal: Signal): Promise<number | null> {
+  try {
+    const base = signal.pair.split('/')[0];
+    const params = new URLSearchParams();
+    if (signal.contractAddress) params.set('ca', signal.contractAddress);
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/price/${encodeURIComponent(base)}?${params}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.price ? Number(data.price) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** checkTargetsHit for non-Binance networks using current DexScreener price */
+async function checkTargetsHitDex<T extends Signal & { targets: Target[] }>(signal: T, tx: TransactionClient): Promise<T> {
+  const currentPrice = await getDexPrice(signal);
+  if (!currentPrice || isNaN(currentPrice)) return signal;
+
+  const updatedTargets = signal.targets.map((target) => ({
+    ...target,
+    hit: target.hit || target.price <= currentPrice,
+  }));
+
+  const hasNewHits = updatedTargets.some((t, i) => t.hit !== signal.targets[i].hit);
+  const allTargetsHit = updatedTargets.every((t) => t.hit);
+
+  if (hasNewHits) {
+    await tx.signal.update({
+      where: { id: signal.id },
+      data: {
+        targets: {
+          updateMany: updatedTargets.map((t) => ({
+            where: { id: t.id },
+            data: { hit: t.hit },
+          })),
+        },
+        ...(allTargetsHit && {
+          isClosed: true,
+          status: Status.CLOSED,
+          closedAt: new Date(),
+        }),
+      },
+    });
+  }
+
+  return {
+    ...signal,
+    targets: updatedTargets,
+    ...(allTargetsHit && {
+      isClosed: true,
+      status: Status.CLOSED,
+      closedAt: new Date(),
+    }),
+  } as T;
+}
+
 type TransactionClient = Omit<
   PrismaClient,
   '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
@@ -116,9 +177,9 @@ export async function checkTargetsHit<T extends Signal & { targets: Target[] }>(
   // Skip if signal is already closed or has no targets
   if (signal.isClosed || signal.targets.length === 0) return signal;
 
-  // Skip Binance check for meme coins/contracts that aren't on Binance
+  // Non-Binance networks (Solana, Base, etc): use DexScreener current price
   if (signal.network && signal.network !== 'binance') {
-    return signal;
+    return checkTargetsHitDex(signal, tx);
   }
 
   try {

@@ -13,9 +13,11 @@ const updateSignalSchema = z.object({
     z.object({
       price: z.number(),
       gain: z.number(),
+      hit: z.boolean().optional(),
     }),
   ),
   note: z.string(),
+  status: z.string().optional(),
 });
 
 /**
@@ -78,6 +80,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ signal
     const body = await req.json();
     const validatedData = updateSignalSchema.parse(body);
 
+    // Fetch existing targets to preserve hit state by target number
+    const existingTargets = await prisma.target.findMany({
+      where: { signalId },
+      select: { number: true, hit: true },
+    });
+    const hitByNumber = Object.fromEntries(existingTargets.map((t) => [t.number, t.hit]));
+
     const updatedSignal = await prisma.signal.update({
       where: { id: signalId },
       data: {
@@ -87,18 +96,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ signal
         entryZone: validatedData.entryZone,
         stopLoss: validatedData.stopLoss,
         note: validatedData.note,
+        ...(validatedData.status ? { status: validatedData.status as any } : {}),
         targets: {
           deleteMany: {},
           create: validatedData.takeProfit.map((target, index) => ({
             number: index + 1,
             price: target.price,
-            hit: false,
+            // Preserve hit=true if this target number was already hit,
+            // or use the value the caller sent, or default false
+            hit: target.hit ?? hitByNumber[index + 1] ?? false,
             gain: target.gain,
           })),
         },
       },
       include: {
-        targets: true,
+        targets: { orderBy: { number: 'asc' } },
+        favorites: { select: { id: true, userId: true, signalId: true, createdAt: true } },
       },
     });
 
