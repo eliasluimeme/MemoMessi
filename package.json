@@ -44,6 +44,7 @@
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^11.15.0",
+    "inngest": "^3.52.6",
     "jose": "^5.9.6",
     "jsonwebtoken": "^9.0.2",
     "libphonenumber-js": "^1.11.17",

@@ -6,6 +6,7 @@ import { Flame, Activity } from 'lucide-react';
 
 import AnalyticsCards from './_components/analytics-cards';
 import { CommandStats } from './_components/command-stats';
+import { WatcherStatus } from './_components/watcher-status';
 import { MonthlyRevenue } from './_components/monthly-revenue';
 import { PlanDistribution } from './_components/plan-distribution';
 import { TopPairs } from './_components/top-pairs';
@@ -66,6 +67,13 @@ export default async function AdminDashboard() {
         <MotionItem>
           <Suspense fallback={<SectionSkeleton className="h-20" />}>
             <CommandStats />
+          </Suspense>
+        </MotionItem>
+
+        {/* ── TP Watcher Status ────────────────────────────────────── */}
+        <MotionItem>
+          <Suspense fallback={<SectionSkeleton className="h-36" />}>
+            <WatcherStatus />
           </Suspense>
         </MotionItem>
 
