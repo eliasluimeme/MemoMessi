@@ -83,11 +83,11 @@ export function ContactSection() {
 
             <div className="group relative mt-4 w-full overflow-hidden rounded-full p-[1px] sm:mt-8 sm:w-auto">
               <button
-                onClick={() => window.open(`https://wa.me/+212721220118?text=${message}`, '_blank')}
+                onClick={() => window.open(`https://t.me/khalid12303`, '_blank')}
                 className="relative flex w-full items-center justify-center gap-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 backdrop-blur-md px-6 py-3 text-base font-light text-white transition-all duration-300 sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
               >
                 <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
-                Contact via WhatsApp
+                Contact via Telegram
               </button>
             </div>
 
