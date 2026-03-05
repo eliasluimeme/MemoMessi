@@ -10,6 +10,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 
 import TokenChart from '@/components/token-chart';
+import CurrentPrice from '@/components/live-price';
 import { TokenImage } from '@/components/token-image';
 import { MotionContainer, MotionItem } from '@/components/motion-container';
 import { cn } from '@/lib/utils';
@@ -81,10 +82,18 @@ export default async function SignalPage({ params }: { params: Promise<{ id: str
                     {st.label}
                   </div>
                 </div>
-                <h1 className="text-4xl md:text-6xl font-light tracking-tight text-foreground flex items-baseline gap-2">
-                  {base}
-                  <span className="text-xl text-muted-foreground/40">/{quote}</span>
-                </h1>
+                <div className="flex items-baseline gap-4 flex-wrap">
+                  <h1 className="text-4xl md:text-6xl font-light tracking-tight text-foreground flex items-baseline gap-2">
+                    {base}
+                    <span className="text-xl text-muted-foreground/40">/{quote}</span>
+                  </h1>
+                  <CurrentPrice
+                    token={base}
+                    contractAddress={signal.contractAddress}
+                    network={signal.network}
+                    className="text-2xl md:text-3xl"
+                  />
+                </div>
                 <p className="text-xs text-muted-foreground/50 uppercase tracking-widest font-semibold">
                   {signal.network ?? 'Solana'} · {signal.market} · {formatDistanceToNow(new Date(signal.createdAt))} ago
                 </p>
@@ -112,7 +121,7 @@ export default async function SignalPage({ params }: { params: Promise<{ id: str
 
         {/* ── Chart ─────────────────────────────────────────────── */}
         <MotionItem>
-          <div className="rounded-[24px] border border-border/40 bg-card/40 backdrop-blur-xl overflow-hidden">
+          <div className="overflow-hidden">
             <TokenChart
               token={base}
               createdAt={signal.createdAt}
@@ -132,7 +141,7 @@ export default async function SignalPage({ params }: { params: Promise<{ id: str
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
             {/* Targets */}
-            <div className="lg:col-span-7 rounded-[24px] border border-border/40 bg-card/40 backdrop-blur-xl p-8 space-y-6">
+            <div className="lg:col-span-7 p-8 space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">

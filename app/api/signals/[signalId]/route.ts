@@ -18,11 +18,34 @@ const updateSignalSchema = z.object({
   note: z.string(),
 });
 
+/**
+ * Check admin: mirrors getSession() role priority:
+ *   app_metadata.role (set by service role, embedded in JWT)
+ *   > DB role (most reliable)
+ *   > user_metadata.role (legacy fallback)
+ */
 async function checkAdmin() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) return null;
-  const role = user.user_metadata.role || 'USER';
+
+  // 1. app_metadata set by service-role client on login — most authoritative
+  const appMetaRole = (user.app_metadata?.role as string | undefined)?.toUpperCase();
+
+  // 2. DB role — reliable but requires a query
+  let dbRole: string | undefined;
+  if (!appMetaRole) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { role: true },
+    });
+    dbRole = (dbUser?.role as string | undefined)?.toUpperCase();
+  }
+
+  // 3. Fallback: user_metadata (can be out of sync, but last resort)
+  const userMetaRole = (user.user_metadata?.role as string | undefined)?.toUpperCase();
+
+  const role = appMetaRole ?? dbRole ?? userMetaRole ?? 'USER';
   if (role !== 'ADMIN' && role !== 'PRIVATE') return null;
   return user;
 }

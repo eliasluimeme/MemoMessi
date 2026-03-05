@@ -6,10 +6,11 @@ import Link from 'next/link';
 
 import { SignalWithTargets } from '@/types/signal';
 import { formatDistanceToNow } from 'date-fns';
-import { ExternalLink, Pencil, Search, Share2 } from 'lucide-react';
+import { ExternalLink, Lock, Pencil, Search, Share2 } from 'lucide-react';
 
 import { DeleteSignalModal } from '@/components/modals/delete-signal-modal';
 import { EditSignalModal } from '@/components/modals/edit-signal-modal';
+import { CloseSignalModal } from '@/components/modals/close-signal-modal';
 import { TokenImage } from '@/components/token-image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -62,6 +63,7 @@ export function SignalsList({ initialSignals }: SignalsListProps) {
   const [selectedSignal, setSelectedSignal] = useState<SignalWithTargets | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
 
   // Filter signals
   const filteredSignals = signals.filter((signal) => {
@@ -80,6 +82,18 @@ export function SignalsList({ initialSignals }: SignalsListProps) {
 
   const handleDelete = () => {
     setSignals((prev) => prev.filter((signal) => signal.id !== selectedSignal?.id));
+  };
+
+  const handleClose = () => {
+    setSignals((prev) =>
+      prev.map((s) =>
+        s.id === selectedSignal?.id ? { ...s, status: 'CLOSED', isClosed: true } : s
+      )
+    );
+  };
+
+  const handleEdit = (updated: SignalWithTargets) => {
+    setSignals((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
   };
 
   const getFilterLabel = (filter: string) => {
@@ -197,6 +211,19 @@ export function SignalsList({ initialSignals }: SignalsListProps) {
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
+                    {signal.status !== 'CLOSED' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Close Signal"
+                        onClick={() => {
+                          setSelectedSignal(signal);
+                          setIsCloseModalOpen(true);
+                        }}
+                      >
+                        <Lock className="h-4 w-4 text-amber-500" />
+                      </Button>
+                    )}
                     <SignalDetailsSheet
                       signal={signal}
                       onEditClick={() => {
@@ -248,6 +275,16 @@ export function SignalsList({ initialSignals }: SignalsListProps) {
               setIsEditModalOpen(false);
               setSelectedSignal(null);
             }}
+            onSuccess={handleEdit}
+          />
+          <CloseSignalModal
+            isOpen={isCloseModalOpen}
+            onClose={() => {
+              setIsCloseModalOpen(false);
+              setSelectedSignal(null);
+            }}
+            signalId={selectedSignal.id}
+            onSuccess={handleClose}
           />
         </>
       )}

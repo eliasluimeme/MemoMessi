@@ -29,6 +29,7 @@ interface EditSignalModalProps {
   isOpen: boolean;
   onClose: () => void;
   signal: SignalWithTargets;
+  onSuccess?: (updated: SignalWithTargets) => void;
 }
 
 interface FormData {
@@ -75,7 +76,7 @@ const calculatePotentialGains = (targetPrice: number, entryPrice: number): numbe
   return ((targetPrice - entryPrice) / entryPrice) * 100;
 };
 
-export function EditSignalModal({ isOpen, onClose, signal }: EditSignalModalProps) {
+export function EditSignalModal({ isOpen, onClose, signal, onSuccess }: EditSignalModalProps) {
   const [formData, setFormData] = useState<FormData>({
     pair: '',
     market: 'SPOT',
@@ -221,10 +222,12 @@ export function EditSignalModal({ isOpen, onClose, signal }: EditSignalModalProp
         throw new Error(data.error || 'Failed to update signal');
       }
 
+      const updated: SignalWithTargets = await response.json();
       toast({
         title: 'Success',
         description: 'Signal updated successfully!',
       });
+      onSuccess?.(updated);
       onClose();
     } catch (error) {
       console.error({ error });
