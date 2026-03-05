@@ -56,7 +56,7 @@ export function useSignup(): UseSignupReturn {
         variant: 'success',
       });
 
-      router.push('/verification');
+      router.push('/dashboard');
     } catch (error) {
       setIsLoading(false);
       toast({
