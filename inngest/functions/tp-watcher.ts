@@ -136,6 +136,16 @@ export const tpWatcher = inngest.createFunction(
         let closedByTP = false;
 
         // ── TP evaluation ──────────────────────────────────────────────────
+        // Edge-case: all targets already hit in previous runs but signal was
+        // never closed (e.g. from a prior bug). Force-close it now.
+        if (signal.targets.length === 0 && signal.stopLoss == null) {
+          await prisma.signal.update({
+            where: { id: signal.id },
+            data: { isClosed: true, closedAt: now, status: Status.CLOSED },
+          });
+          continue;
+        }
+
         if (signal.targets.length > 0) {
           const newlyHitTargets = signal.targets.filter(
             (t) => !t.hit && currentPrice! >= t.price,
