@@ -78,13 +78,13 @@ export default function SignalCard({ signal }: SignalCardProps) {
           <div className="h-3 w-28 dark:bg-white/[0.03] bg-muted/20 rounded" />
         </div>
 
-        {/* Amber gradient wash */}
-        <div className="absolute inset-0 bg-gradient-to-b dark:from-amber-950/40 dark:via-black/20 dark:to-amber-950/30 from-amber-50/70 via-background/10 to-amber-100/50" />
+        {/* Amber gradient wash — dark mode only to avoid cream bleed in light mode */}
+        <div className="absolute inset-0 dark:bg-gradient-to-b dark:from-amber-950/40 dark:via-black/20 dark:to-amber-950/30 bg-background/60" />
 
         {/* Lock overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3.5 px-5">
           {/* VIP badge */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-400 text-[10px] font-extrabold uppercase tracking-[0.12em] shadow-[0_0_16px_rgba(245,158,11,0.15)]">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 dark:border-amber-500/35 text-amber-600 dark:text-amber-400 text-[10px] font-extrabold uppercase tracking-[0.12em] dark:shadow-[0_0_16px_rgba(245,158,11,0.15)]">
             <Crown className="h-3 w-3" /> VIP
           </div>
 
@@ -95,9 +95,9 @@ export default function SignalCard({ signal }: SignalCardProps) {
 
           {/* Lock icon with glow */}
           <div className="relative">
-            <div className="absolute inset-0 rounded-2xl bg-amber-500/30 blur-xl" />
+            <div className="absolute inset-0 rounded-2xl dark:bg-amber-500/30 bg-amber-500/10 blur-xl" />
             <div className="relative h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/40 flex items-center justify-center">
-              <Lock className="h-5 w-5 text-amber-400" />
+              <Lock className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
 
@@ -107,7 +107,7 @@ export default function SignalCard({ signal }: SignalCardProps) {
 
           <Link
             href="/upgrade"
-            className="inline-flex items-center gap-1.5 h-8 px-5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 dark:text-amber-300 text-[11px] font-bold hover:bg-amber-500/30 hover:border-amber-500/60 transition-all duration-200 shadow-[0_2px_14px_rgba(245,158,11,0.18)]"
+            className="inline-flex items-center gap-1.5 h-8 px-5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-700 dark:text-amber-300 text-[11px] font-bold hover:bg-amber-500/30 hover:border-amber-500/60 transition-all duration-200 dark:shadow-[0_2px_14px_rgba(245,158,11,0.18)]"
           >
             <Crown className="h-3 w-3" /> Upgrade
           </Link>
@@ -121,7 +121,7 @@ export default function SignalCard({ signal }: SignalCardProps) {
       <div className={cn(
         'relative flex flex-col h-full rounded-2xl backdrop-blur-xl p-5 gap-4 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden border',
         signal.isVip
-          ? 'border-amber-500/25 dark:border-amber-500/20 bg-amber-500/[0.025] dark:bg-amber-500/[0.02] hover:border-amber-500/40 shadow-[0_0_28px_rgba(245,158,11,0.06)]'
+          ? 'border-amber-500/20 dark:bg-amber-500/[0.02] bg-card hover:border-amber-500/35 dark:shadow-[0_0_28px_rgba(245,158,11,0.06)]'
           : 'dark:border-white/[0.06] border-border dark:bg-[#0a0a0a2d] bg-card dark:hover:border-white/[0.1] hover:border-border/80 shadow-sm dark:shadow-none'
       )}>
         {/* Amber accent line for VIP signals */}
