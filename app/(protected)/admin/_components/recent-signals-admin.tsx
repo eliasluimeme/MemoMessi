@@ -84,7 +84,7 @@ export async function RecentSignalsAdmin() {
 
                   {/* Header */}
                   <div className="flex items-center gap-3 relative flex-shrink-0">
-                    <TokenImage token={base} className="h-9 w-9 rounded-xl flex-shrink-0" />
+                    <TokenImage token={base} network={signal.network} contractAddress={signal.contractAddress} className="h-9 w-9 rounded-xl flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline gap-1">
                         <span className="text-[15px] font-bold tracking-tight text-foreground truncate">{base}</span>

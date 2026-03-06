@@ -26,6 +26,7 @@ export async function POST(request: Request) {
         contractAddress: body.contractAddress,
         network: body.network || 'solana',
         status: 'WITHIN_ENTRY_ZONE',
+        isVip: body.isVip === true,
         targets: {
           create: body.takeProfit.map((target: { price: number; gain: number }, index: number) => ({
             number: index + 1,
@@ -89,6 +90,7 @@ interface Signal {
   note: string | null;
   contractAddress?: string | null;
   network?: string | null;
+  isVip?: boolean;
   targets: Target[];
 }
 
@@ -98,8 +100,11 @@ function formatSignalMessage(signal: Signal) {
     .map((t) => `TP${t.number}: $${t.price} (${t.gain}%)`)
     .join('\n');
 
+  const tier = signal.isVip ? '👑 <b>VIP SIGNAL</b>' : '🔓 <b>FREE SIGNAL</b>';
+
   return `
 🚨 <b>New Signal Alert!</b>
+${tier}
 
 📊 <b>Pair:</b> ${signal.pair}
 🌐 <b>Network:</b> ${signal.network?.toUpperCase() || 'SOLANA'}

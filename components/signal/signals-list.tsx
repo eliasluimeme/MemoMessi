@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 
 import { Favorite, Signal, Target } from '@prisma/client';
 // import { SignalWithTargets } from '@/types/signal';
-import { ArrowDownAZ, ArrowUpAZ, BanknoteIcon, Filter, Search } from 'lucide-react';
+import { ArrowDownAZ, ArrowUpAZ, BanknoteIcon, Crown, Filter, Search } from 'lucide-react';
 
 import SignalCard from '@/components/signal/signal-card';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ export type SignalWithTargets = Signal & {
   targets: Target[];
   favorites: Favorite[];
   isFavorite?: boolean;
+  isLocked?: boolean;
 };
 
 export function ContentView({ signals }: { signals: SignalWithTargets[] }) {
@@ -73,7 +74,10 @@ export function ContentView({ signals }: { signals: SignalWithTargets[] }) {
       filtered = filtered.filter((signal) => {
         return activeFilters.some(
           (filter) =>
-            signal.status === filter || signal.market === filter || signal.action === filter,
+            signal.status === filter ||
+            signal.market === filter ||
+            signal.action === filter ||
+            (filter === 'VIP' && (signal as any).isVip === true),
         );
       });
     }
@@ -113,6 +117,7 @@ export function ContentView({ signals }: { signals: SignalWithTargets[] }) {
       CLOSED: 0,
       BUY: 0,
       SELL: 0,
+      VIP: 0,
     };
 
     signals.forEach((signal) => {
@@ -121,13 +126,14 @@ export function ContentView({ signals }: { signals: SignalWithTargets[] }) {
       if (signal.status === 'CLOSED') counts.CLOSED++;
       if (signal.action === 'BUY') counts.BUY++;
       if (signal.action === 'SELL') counts.SELL++;
+      if ((signal as any).isVip) counts.VIP++;
     });
 
     return counts;
   }, [signals]);
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-2">
       <header className="flex flex-col gap-16">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-12 pb-16">
           <div className="relative w-full md:max-w-2xl group">
@@ -158,17 +164,20 @@ export function ContentView({ signals }: { signals: SignalWithTargets[] }) {
             <div className="h-4 w-[1px] dark:bg-white/[0.05] bg-border" />
 
             <div className="flex items-center gap-4 overflow-x-auto scrollbar-hide py-2">
-              {['ALL', 'SPOT', 'WITHIN_ENTRY_ZONE', 'CLOSED'].map((filter) => (
+              {['ALL', 'SPOT', 'WITHIN_ENTRY_ZONE', 'CLOSED', 'VIP'].map((filter) => (
                 <button
                   key={filter}
                   onClick={() => toggleFilter(filter)}
                   className={cn(
-                    "relative overflow-hidden px-8 h-12 rounded-full text-micro transition-all duration-1000 border group/btn flex items-center justify-center",
+                    "relative overflow-hidden px-8 h-12 rounded-full text-micro transition-all duration-1000 border group/btn flex items-center justify-center gap-1.5",
                     (activeFilters[0] || 'ALL') === filter
-                      ? "bg-primary/5 text-primary border-primary/20"
+                      ? filter === 'VIP'
+                        ? "bg-amber-500/5 text-amber-400 border-amber-500/20"
+                        : "bg-primary/5 text-primary border-primary/20"
                       : "dark:bg-white/[0.01] bg-background dark:text-muted-foreground/30 text-muted-foreground/70 dark:border-white/[0.02] border-border/60 dark:hover:border-white/[0.08] hover:border-border hover:bg-muted/30 hover:text-foreground"
                   )}
                 >
+                  {filter === 'VIP' && <Crown className="h-2.5 w-2.5" />}
                   <span className="relative z-10">{filter.replace(/_/g, ' ')}</span>
                   {((activeFilters[0] || 'ALL') === filter) && (
                     <div className="absolute inset-0 bg-primary/10 blur-xl rounded-full" />

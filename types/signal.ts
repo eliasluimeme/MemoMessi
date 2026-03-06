@@ -33,6 +33,8 @@ export interface Signal {
   imageUrl?: string;
   contractAddress?: string;
   network?: string;
+  isVip?: boolean;
+  isLocked?: boolean;
   createdAt: Date;
   updatedAt: Date;
   favorites?: Favorite[];
@@ -43,4 +45,4 @@ export type SignalWithTargets = Prisma.SignalGetPayload<{
     targets: true;
     favorites: true;
   };
-}>;
+}> & { isLocked?: boolean; isFavorite?: boolean };

@@ -58,23 +58,33 @@ export async function GET(
       }
     }
 
-    // 2. Try Binance (CEX tokens like BTC, ETH, SOL)
+    // 2. Try Binance (CEX tokens like BTC, ETH, SOL) — short timeout so failures don't block
     const symbol = `${upperToken}USDT`;
-    const binanceRes = await fetch(
-      `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`,
-      { next: { revalidate: 0 } },
-    );
+    try {
+      const binanceController = new AbortController();
+      const binanceTimeout = setTimeout(() => binanceController.abort(), 3000);
+      const binanceRes = await fetch(
+        `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`,
+        { next: { revalidate: 0 }, signal: binanceController.signal },
+      );
+      clearTimeout(binanceTimeout);
 
-    if (binanceRes.ok) {
-      const data = await binanceRes.json();
-      if (data?.price) return NextResponse.json(data);
+      if (binanceRes.ok) {
+        const data = await binanceRes.json();
+        if (data?.price) return NextResponse.json(data);
+      }
+    } catch {
+      // Binance unreachable or timed out — fall through to DexScreener
     }
 
     // 3. Fallback: DexScreener symbol search (least accurate — only when no CA)
+    const dexSearchController = new AbortController();
+    const dexSearchTimeout = setTimeout(() => dexSearchController.abort(), 8000);
     const dexRes = await fetch(
       `https://api.dexscreener.com/latest/dex/search?q=${upperToken}`,
-      { next: { revalidate: 0 } },
+      { next: { revalidate: 0 }, signal: dexSearchController.signal },
     );
+    clearTimeout(dexSearchTimeout);
 
     if (dexRes.ok) {
       const dexData = await dexRes.json();

@@ -2,9 +2,23 @@ import { MotionContainer, MotionItem } from '@/components/motion-container';
 import { PerformanceMetrics } from '@/components/performance-metrics';
 import { SignalFeed } from '@/components/signal-feed';
 import { TotalProfit } from '@/components/total-profit';
-import { ShieldCheck, TrendingUp, ArrowUpRight, Zap } from 'lucide-react';
+import { ShieldCheck, TrendingUp, ArrowUpRight, Zap, Crown, Check } from 'lucide-react';
+import { getSession } from '@/lib/auth-utils';
+import { isVipUser } from '@/actions/signals';
+import Link from 'next/link';
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  let vip = false;
+  try {
+    const session = await getSession();
+    if (session?.id) {
+      const role = session.role;
+      vip = role === 'ADMIN' || role === 'PRIVATE' || await isVipUser(session.id as string);
+    }
+  } catch {
+    // unauthenticated
+  }
+
   return (
     <div className="container mx-auto py-12 px-6 md:px-12 max-w-[1400px]">
       <MotionContainer className="flex flex-col gap-20">
@@ -77,33 +91,74 @@ export default function Dashboard() {
           </MotionItem>
 
           <MotionItem className="lg:col-span-4">
-            <div className="sticky top-24 rounded-[32px] border border-primary/20 bg-primary/5 p-10 overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity duration-700">
-                <Zap className="w-48 h-48 text-primary blur-3xl" />
-              </div>
-              <div className="relative z-10 flex flex-col gap-8">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-primary" />
+            {vip ? (
+              /* VIP Active card */
+              <div className="sticky top-24 rounded-[32px] border border-amber-500/30 bg-amber-500/5 p-10 overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity duration-700">
+                  <Crown className="w-48 h-48 text-amber-400 blur-3xl" />
                 </div>
-                <div className="space-y-3">
-                  <h3 className="text-3xl font-light tracking-tight">Institutional<br />Access</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Unlock proprietary data streams and execution routes for maximum alpha generation.
-                  </p>
-                </div>
-                <div className="space-y-3 pt-4 border-t border-primary/10">
-                  {['Market Scanning', 'Deep Links Execution', 'Expert Verification'].map((feat, i) => (
-                    <div key={i} className="flex items-center gap-3 text-sm text-foreground/80">
-                      <div className="w-1 h-1 rounded-full bg-primary/50" />
-                      {feat}
+                <div className="relative z-10 flex flex-col gap-8">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                    <Crown className="h-5 w-5 text-amber-400" />
+                  </div>
+                  <div className="space-y-3">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-widest">
+                      VIP Active
                     </div>
-                  ))}
+                    <h3 className="text-3xl font-light tracking-tight">Full<br />Access Unlocked</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      You have unrestricted access to all VIP signals, exclusive alpha streams, and priority market intelligence.
+                    </p>
+                  </div>
+                  <div className="space-y-3 pt-4 border-t border-amber-500/10">
+                    {['All VIP Signals Unlocked', 'Priority Telegram Alerts', 'Exclusive Alpha Stream', 'Expert Verification'].map((feat, i) => (
+                      <div key={i} className="flex items-center gap-3 text-sm text-foreground/80">
+                        <Check className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                        {feat}
+                      </div>
+                    ))}
+                  </div>
+                  <Link
+                    href="/signals"
+                    className="w-full py-4 mt-4 rounded-xl bg-amber-500 text-black font-semibold text-sm hover:bg-amber-400 transition-colors text-center block"
+                  >
+                    View All VIP Signals
+                  </Link>
                 </div>
-                <button className="w-full py-4 mt-4 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity">
-                  Upgrade Terminal
-                </button>
               </div>
-            </div>
+            ) : (
+              /* Free tier upgrade card */
+              <div className="sticky top-24 rounded-[32px] border border-primary/20 bg-primary/5 p-10 overflow-hidden group">
+                <div className="absolute top-0 right-0 p-8 opacity-20 group-hover:opacity-40 transition-opacity duration-700">
+                  <Zap className="w-48 h-48 text-primary blur-3xl" />
+                </div>
+                <div className="relative z-10 flex flex-col gap-8">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <Zap className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="space-y-3">
+                    <h3 className="text-3xl font-light tracking-tight">Institutional<br />Access</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Unlock proprietary VIP signal streams and exclusive alpha for maximum edge in the market.
+                    </p>
+                  </div>
+                  <div className="space-y-3 pt-4 border-t border-primary/10">
+                    {[' VIP Exclusive Signals', ' Priority Telegram Alerts', ' Full Alpha Stream'].map((feat, i) => (
+                      <div key={i} className="flex items-center gap-3 text-sm text-foreground/60">
+                        <div className="w-1 h-1 rounded-full bg-primary/50" />
+                        {feat}
+                      </div>
+                    ))}
+                  </div>
+                  <Link
+                    href="/upgrade"
+                    className="w-full py-4 mt-4 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity text-center block"
+                  >
+                    Upgrade to VIP
+                  </Link>
+                </div>
+              </div>
+            )}
           </MotionItem>
         </div>
       </MotionContainer>

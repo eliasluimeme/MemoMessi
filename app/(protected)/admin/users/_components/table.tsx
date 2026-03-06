@@ -49,7 +49,9 @@ export default function UsersTable({ users }: { users: TUser[] }) {
     const matchesSearch =
       user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || user.subscriptions?.status === statusFilter;
+    const matchesStatus =
+      statusFilter === 'all' ||
+      (statusFilter === 'FREE' ? !user.subscriptions : user.subscriptions?.status === statusFilter);
     return matchesSearch && matchesStatus;
   });
 
@@ -64,9 +66,11 @@ export default function UsersTable({ users }: { users: TUser[] }) {
   const getFilterLabel = (filter: string) => {
     switch (filter) {
       case 'all':
-        return `All Users (${filteredUsers.length})`;
+        return `All Users (${users.length})`;
+      case 'FREE':
+        return `Free (${users.filter((u) => !u.subscriptions).length})`;
       case 'ACTIVE':
-        return `Active (${users.filter((u) => u.subscriptions?.status === 'ACTIVE').length})`;
+        return `VIP Active (${users.filter((u) => u.subscriptions?.status === 'ACTIVE').length})`;
       case 'PENDING':
         return `Pending (${users.filter((u) => u.subscriptions?.status === 'PENDING').length})`;
       case 'SUSPENDED':
@@ -96,6 +100,7 @@ export default function UsersTable({ users }: { users: TUser[] }) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{getFilterLabel('all')}</SelectItem>
+            <SelectItem value="FREE">{getFilterLabel('FREE')}</SelectItem>
             <SelectItem value="ACTIVE">{getFilterLabel('ACTIVE')}</SelectItem>
             <SelectItem value="PENDING">{getFilterLabel('PENDING')}</SelectItem>
             <SelectItem value="SUSPENDED">{getFilterLabel('SUSPENDED')}</SelectItem>
@@ -110,7 +115,7 @@ export default function UsersTable({ users }: { users: TUser[] }) {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
+              {/* <TableHead>Phone</TableHead> */}
               <TableHead>Date</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Plan</TableHead>
@@ -128,7 +133,7 @@ export default function UsersTable({ users }: { users: TUser[] }) {
                   {user.fullName}
                 </TableCell>
                 <TableCell>{user.email}</TableCell>
-                <TableCell>{user.phoneNumber}</TableCell>
+                {/* <TableCell>{user.phoneNumber}</TableCell> */}
                 <TableCell>
                   {user.createdAt.toLocaleDateString('en-US', {
                     year: 'numeric',

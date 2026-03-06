@@ -1,22 +1,11 @@
-import { createClient } from '@/lib/supabase';
 import { prisma } from '@/lib/prisma';
+import { getSession } from '@/lib/auth-utils';
 import { NextResponse } from 'next/server';
-
-async function checkAdmin() {
-  const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-
-  if (error || !user) return null;
-  const role = user.user_metadata.role || 'USER';
-  if (role !== 'ADMIN' && role !== 'PRIVATE') return null;
-
-  return user;
-}
 
 export async function GET() {
   try {
-    const admin = await checkAdmin();
-    if (!admin) {
+    const session = await getSession();
+    if (!session || (session.role !== 'ADMIN' && session.role !== 'PRIVATE')) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 
@@ -47,8 +36,8 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
-    const admin = await checkAdmin();
-    if (!admin) {
+    const session = await getSession();
+    if (!session || (session.role !== 'ADMIN' && session.role !== 'PRIVATE')) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 

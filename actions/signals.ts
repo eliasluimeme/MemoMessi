@@ -75,7 +75,17 @@ type TSignal = Signal & {
   targets: Target[];
   favorites: Favorite[];
   isFavorite?: boolean;
+  isLocked?: boolean;
 };
+
+/** Returns true if the user has an active VIP subscription */
+export async function isVipUser(userId: string): Promise<boolean> {
+  const sub = await prisma.subscription.findUnique({
+    where: { userId },
+    select: { status: true },
+  });
+  return sub?.status === 'ACTIVE';
+}
 
 export async function getFavoriteSignals() {
   const session = await getSession();
@@ -85,6 +95,8 @@ export async function getFavoriteSignals() {
   }
 
   const userId = session.id as string;
+  const isAdmin = session.role === 'ADMIN' || session.role === 'PRIVATE';
+  const vip = isAdmin || (await isVipUser(userId));
 
   try {
     const favorites = await prisma.favorite.findMany({
@@ -104,10 +116,38 @@ export async function getFavoriteSignals() {
       },
     });
 
-    const signalsWithFavoriteStatus = favorites.map((favorite) => ({
-      ...favorite.signal,
-      isFavorite: true,
-    }));
+    const signalsWithFavoriteStatus = favorites.map((favorite) => {
+      const isLocked = !vip && favorite.signal.isVip;
+      if (isLocked) {
+        return {
+          id: favorite.signal.id,
+          pair: favorite.signal.pair,
+          market: favorite.signal.market,
+          action: favorite.signal.action,
+          network: favorite.signal.network,
+          status: favorite.signal.status,
+          isVip: favorite.signal.isVip,
+          isLocked: true,
+          isFavorite: true,
+          isClosed: favorite.signal.isClosed,
+          createdAt: favorite.signal.createdAt,
+          updatedAt: favorite.signal.updatedAt,
+          entryZone: 0,
+          stopLoss: null,
+          targets: [],
+          favorites: [],
+          contractAddress: null,
+          note: null,
+          imageURL: null,
+          closedAt: null,
+        };
+      }
+      return {
+        ...favorite.signal,
+        isFavorite: true,
+        isLocked: false,
+      };
+    });
 
     return signalsWithFavoriteStatus as TSignal[];
   } catch (error) {
@@ -122,6 +162,10 @@ export async function getAllSignals() {
   if (!session || !session.id) throw new Error('Unauthorized');
 
   const userId = session.id as string;
+  const isAdmin = session.role === 'ADMIN' || session.role === 'PRIVATE';
+
+  // Check VIP status (admins always have full access)
+  const vip = isAdmin || (await isVipUser(userId));
 
   try {
     return await prisma.$transaction(async (tx) => {
@@ -157,13 +201,43 @@ export async function getAllSignals() {
         }),
       );
 
-      // Map signals and set isFavorite based on if user has favorited
-      const signalsWithFavoriteStatus = updatedSignals.map((signal) => ({
-        ...signal,
-        isFavorite: signal.favorites.length > 0,
-        // Clean up favorites array since we only used it to check status
-        favorites: [],
-      }));
+      // Map signals: VIP signals are locked for free users.
+      // Locked signals have sensitive fields stripped so data is never exposed.
+      const signalsWithFavoriteStatus = updatedSignals.map((signal) => {
+        const isLocked = !vip && signal.isVip;
+        if (isLocked) {
+          // Return only non-sensitive metadata — no prices, targets, CA or notes
+          return {
+            id: signal.id,
+            pair: signal.pair,
+            market: signal.market,
+            action: signal.action,
+            network: signal.network,
+            status: signal.status,
+            isVip: signal.isVip,
+            isLocked: true,
+            isFavorite: signal.favorites.length > 0,
+            isClosed: signal.isClosed,
+            createdAt: signal.createdAt,
+            updatedAt: signal.updatedAt,
+            // Sensitive fields zeroed out
+            entryZone: 0,
+            stopLoss: null,
+            targets: [],
+            favorites: [],
+            contractAddress: null,
+            note: null,
+            imageURL: null,
+            closedAt: null,
+          };
+        }
+        return {
+          ...signal,
+          isFavorite: signal.favorites.length > 0,
+          favorites: [],
+          isLocked: false,
+        };
+      });
 
       return signalsWithFavoriteStatus as TSignal[];
     });

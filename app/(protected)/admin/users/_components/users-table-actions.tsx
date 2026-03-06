@@ -21,9 +21,17 @@ export default function UsersTableActions({ user }: { user: TUser }) {
     router.refresh();
   };
 
+  const noSubscription = !user.subscriptions;
+
   return (
     <>
       <div className="flex justify-end gap-2">
+        {/* Free tier — no subscription yet */}
+        {noSubscription && (
+          <Button variant="outline" size="sm" onClick={() => setShowApproveModal(true)}>
+            Give VIP
+          </Button>
+        )}
         {user.subscriptions?.status === 'PENDING' && (
           <Button variant="outline" size="sm" onClick={() => setShowApproveModal(true)}>
             Approve
@@ -53,22 +61,31 @@ export default function UsersTableActions({ user }: { user: TUser }) {
   );
 }
 
-export function UserStatusBadge({ status }: { status: SubscriptionStatus }) {
+export function UserStatusBadge({ status }: { status?: SubscriptionStatus }) {
+  if (!status) {
+    return (
+      <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+        Free
+      </span>
+    );
+  }
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${status === 'ACTIVE'
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+        status === 'ACTIVE'
           ? 'bg-green-100 text-green-800'
           : status === 'PENDING'
             ? 'bg-yellow-100 text-yellow-800'
             : 'bg-red-100 text-red-800'
-        }`}
+      }`}
     >
       {status}
     </span>
   );
 }
 
-export function PlanBadge({ plan }: { plan: PlanType }) {
+export function PlanBadge({ plan }: { plan?: PlanType }) {
+  if (!plan) return <span className="text-xs text-muted-foreground/50">—</span>;
   return (
     <span>
       {plan === 'ONE_MONTH' && '1 Month'}

@@ -41,6 +41,7 @@ model Signal {
   updatedAt       DateTime   @default(now()) @db.Timestamptz(6) @map("updated_at")
   contractAddress String?    @map("contract_address")
   network         String?    @default("solana")
+  isVip           Boolean    @default(false) @map("is_vip")
   favorites       Favorite[]
   targets         Target[]
 

@@ -46,6 +46,7 @@ interface FormData {
   stopLoss: string;
   takeProfit: { price: string; gain: number }[];
   note: string;
+  isVip: boolean;
 }
 
 interface FormErrors {
@@ -88,6 +89,7 @@ const initialFormState: FormData = {
   stopLoss: '',
   takeProfit: [{ price: '', gain: 0 }],
   note: '',
+  isVip: false,
 };
 
 const calculatePotentialGains = (targetPrice: number, entryPrice: number): number => {
@@ -345,7 +347,7 @@ export default function AddSignalModal({
       const response = await fetch('/api/postsignals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formDataValidated),
+        body: JSON.stringify({ ...formDataValidated, isVip: formData.isVip }),
       });
       const data = await response.json();
 
@@ -599,6 +601,29 @@ export default function AddSignalModal({
                   {submitError}
                 </div>
               )}
+            </div>
+
+            {/* Signal Tier */}
+            <div className="rounded-xl border dark:border-white/[0.06] border-border/50 dark:bg-white/[0.02] bg-muted/20 p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] dark:text-white/40 text-muted-foreground/70">Signal Tier</p>
+                  <p className="text-[11px] dark:text-white/30 text-muted-foreground/60">
+                    {formData.isVip ? 'VIP only — free users will see this as locked' : 'Free — visible to all users'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, isVip: !prev.isVip }))}
+                  className={`relative inline-flex h-8 items-center gap-2 rounded-full px-4 text-[11px] font-bold transition-all duration-200 border ${
+                    formData.isVip
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                      : 'dark:bg-white/[0.04] bg-muted/50 dark:border-white/[0.08] border-border/60 dark:text-white/40 text-muted-foreground/70'
+                  }`}
+                >
+                  {formData.isVip ? '👑 VIP' : '🔓 Free'}
+                </button>
+              </div>
             </div>
 
             {/* Footer */}

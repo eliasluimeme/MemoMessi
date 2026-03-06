@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import { Favorite, Signal, Target } from '@prisma/client';
 import { formatDistanceToNow } from 'date-fns';
-import { Clock, TrendingUp, TrendingDown } from 'lucide-react';
+import { Clock, Crown, Lock, TrendingUp, TrendingDown } from 'lucide-react';
 
 import LivePrice from '@/components/live-price';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ export type SignalWithTargets = Signal & {
   targets: Target[];
   favorites: Favorite[];
   isFavorite?: boolean;
+  isLocked?: boolean;
 };
 
 interface SignalCardProps {
@@ -40,6 +41,80 @@ export default function SignalCard({ signal }: SignalCardProps) {
   const hitsCount = signal.targets.filter(t => t.hit).length;
   const lastTarget = signal.targets[signal.targets.length - 1];
   const st        = getStatus(signal.status);
+  const isLocked  = signal.isLocked;
+
+  if (isLocked) {
+    return (
+      <div className="relative flex flex-col h-full rounded-2xl border border-amber-500/25 dark:bg-[#0a0a0a2d] bg-card backdrop-blur-xl overflow-hidden shadow-[0_0_28px_rgba(245,158,11,0.06)] dark:shadow-[0_0_28px_rgba(245,158,11,0.08)] select-none">
+        {/* Amber top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent z-10" />
+
+        {/* Blurred background content */}
+        <div className="blur-md pointer-events-none opacity-50 p-5 flex flex-col gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl dark:bg-white/[0.06] bg-muted/50 flex-shrink-0" />
+            <div className="flex-1">
+              <div className="h-4 w-28 dark:bg-white/[0.08] bg-muted/60 rounded mb-1.5" />
+              <div className="h-3 w-16 dark:bg-white/[0.05] bg-muted/40 rounded" />
+            </div>
+            <div className="h-5 w-14 dark:bg-emerald-500/15 bg-emerald-500/10 rounded-full" />
+          </div>
+          <div className="h-6 w-24 dark:bg-white/[0.04] bg-muted/30 rounded-full" />
+          <div className="flex justify-between items-end border-t dark:border-white/[0.04] border-border/50 pt-4">
+            <div>
+              <div className="h-2.5 w-14 dark:bg-white/[0.04] bg-muted/30 rounded mb-2" />
+              <div className="h-6 w-24 dark:bg-amber-400/10 bg-amber-400/8 rounded" />
+            </div>
+            <div className="text-right">
+              <div className="h-2.5 w-14 dark:bg-white/[0.04] bg-muted/30 rounded mb-2 ml-auto" />
+              <div className="h-6 w-20 dark:bg-sky-400/10 bg-sky-400/8 rounded" />
+            </div>
+          </div>
+          <div className="flex gap-1 h-1 w-full">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex-1 h-full rounded-full dark:bg-white/[0.05] bg-muted/30" />
+            ))}
+          </div>
+          <div className="h-3 w-28 dark:bg-white/[0.03] bg-muted/20 rounded" />
+        </div>
+
+        {/* Amber gradient wash */}
+        <div className="absolute inset-0 bg-gradient-to-b dark:from-amber-950/40 dark:via-black/20 dark:to-amber-950/30 from-amber-50/70 via-background/10 to-amber-100/50" />
+
+        {/* Lock overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3.5 px-5">
+          {/* VIP badge */}
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/35 text-amber-400 text-[10px] font-extrabold uppercase tracking-[0.12em] shadow-[0_0_16px_rgba(245,158,11,0.15)]">
+            <Crown className="h-3 w-3" /> VIP
+          </div>
+
+          {/* Token pair hint */}
+          {/* <p className="text-[15px] font-bold dark:text-white/65 text-foreground/70 tracking-tight leading-none">
+            {base}<span className="dark:text-white/20 text-muted-foreground/35 font-normal text-[11px]">/{quote}</span>
+          </p> */}
+
+          {/* Lock icon with glow */}
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl bg-amber-500/30 blur-xl" />
+            <div className="relative h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/40 flex items-center justify-center">
+              <Lock className="h-5 w-5 text-amber-400" />
+            </div>
+          </div>
+
+          <p className="text-[11px] dark:text-white/35 text-muted-foreground/55 text-center max-w-[160px] leading-relaxed">
+            Subscribe to VIP to unlock this signal
+          </p>
+
+          <Link
+            href="/upgrade"
+            className="inline-flex items-center gap-1.5 h-8 px-5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 dark:text-amber-300 text-[11px] font-bold hover:bg-amber-500/30 hover:border-amber-500/60 transition-all duration-200 shadow-[0_2px_14px_rgba(245,158,11,0.18)]"
+          >
+            <Crown className="h-3 w-3" /> Upgrade
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Link href={`/signals/${signal.id}`} className="block group h-full">
@@ -48,7 +123,7 @@ export default function SignalCard({ signal }: SignalCardProps) {
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="relative flex-shrink-0">
-            <TokenImage token={base} className="h-10 w-10 rounded-xl" />
+            <TokenImage token={base} network={signal.network} contractAddress={signal.contractAddress} className="h-10 w-10 rounded-xl" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-1 leading-none">
@@ -75,6 +150,12 @@ export default function SignalCard({ signal }: SignalCardProps) {
           <span className={cn('h-1.5 w-1.5 rounded-full', st.dot)} />
           {st.label}
         </div>
+        {/* VIP badge for VIP signals visible to VIP users */}
+        {signal.isVip && (
+          <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-bold uppercase tracking-widest">
+            <Crown className="h-2.5 w-2.5" /> VIP
+          </div>
+        )}
 
         {/* Prices */}
         <div className="flex justify-between items-end border-t dark:border-white/[0.04] border-border/50 pt-4">

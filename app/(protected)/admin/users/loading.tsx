@@ -62,7 +62,7 @@ export default function UsersLoadingSkeleton() {
               <TableHead className="w-[50px]" />
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
+              {/* <TableHead>Phone</TableHead> */}
               <TableHead>Date</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Plan</TableHead>
@@ -78,9 +78,9 @@ export default function UsersLoadingSkeleton() {
                 <TableCell>
                   <Skeleton className="h-4 w-28 rounded-lg" />
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <Skeleton className="h-4 w-36 rounded-lg" />
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <Skeleton className="h-4 w-28 rounded-lg" />
                 </TableCell>

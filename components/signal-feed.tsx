@@ -4,13 +4,15 @@ import SignalCard from './signal-card-compact';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { getSession } from '@/lib/auth-utils';
+import { isVipUser } from '@/actions/signals';
 
 export async function SignalFeed() {
     let latestSignals: SignalWithTargets[] = [];
     let error = false;
 
     try {
-        latestSignals = await withRetry(() =>
+        const rawSignals = await withRetry(() =>
             prisma.signal.findMany({
                 take: 3,
                 orderBy: { createdAt: 'desc' },
@@ -20,6 +22,35 @@ export async function SignalFeed() {
                 },
             })
         ) as SignalWithTargets[];
+
+        // Determine VIP status for the current user
+        let vip = false;
+        try {
+            const session = await getSession();
+            if (session?.id) {
+                const role = session.role;
+                vip = role === 'ADMIN' || role === 'PRIVATE' || await isVipUser(session.id as string);
+            }
+        } catch {
+            // not authenticated – treat as free
+        }
+
+        // Strip sensitive data from VIP signals for free users
+        latestSignals = rawSignals.map((signal) => {
+            if (signal.isVip && !vip) {
+                return {
+                    ...signal,
+                    entryZone: 0,
+                    stopLoss: null,
+                    targets: [],
+                    contractAddress: null,
+                    note: null,
+                    imageURL: null,
+                    isLocked: true,
+                };
+            }
+            return { ...signal, isLocked: false };
+        });
     } catch (e) {
         console.error('[SignalFeed] DB error:', e);
         error = true;

@@ -107,13 +107,13 @@ export default function Options({ user }: OptionsProps) {
                   <span className="text-sm text-muted-foreground">Email</span>
                   <span className="col-span-2 text-right text-sm font-medium">{user.email}</span>
                 </div>
-                <Separator />
+                {/* <Separator />
                 <div className="grid grid-cols-3 items-center">
                   <span className="text-sm text-muted-foreground">Phone</span>
                   <span className="col-span-2 text-right text-sm font-medium">
                     {user.phoneNumber}
                   </span>
-                </div>
+                </div> */}
                 <Separator />
                 <div className="grid grid-cols-3 items-center">
                   <span className="text-sm text-muted-foreground">Member Since</span>
@@ -133,7 +133,7 @@ export default function Options({ user }: OptionsProps) {
               </div>
             </Card>
 
-            {user.subscriptions && (
+            {user.subscriptions ? (
               <Card className="p-4 shadow-none">
                 <h3 className="mb-4 text-sm font-semibold">Subscription Details</h3>
                 <div className="space-y-3">
@@ -179,6 +179,19 @@ export default function Options({ user }: OptionsProps) {
                   </div>
                 </div>
               </Card>
+            ) : (
+              <Card className="p-4 shadow-none border-amber-500/20 bg-amber-500/[0.03]">
+                <h3 className="mb-3 text-sm font-semibold">Subscription</h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Tier</span>
+                  <Badge variant="secondary" className="bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                    Free Tier
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground/60 mt-3">
+                  This user has no active subscription. Use &quot;Give VIP&quot; to upgrade them.
+                </p>
+              </Card>
             )}
           </div>
 
@@ -206,7 +219,7 @@ export default function Options({ user }: OptionsProps) {
         <ConfirmationModal
           isOpen={showSuspendModal}
           onClose={() => setShowSuspendModal(false)}
-          onConfirm={() => handleSuspendUser(user.subscriptions!.status)}
+          onConfirm={() => handleSuspendUser(user.subscriptions?.status ?? 'ACTIVE')}
           title="Suspend User"
           description={`Are you sure you want to suspend ${user.fullName}'s account? This action can be reversed later.`}
           confirmText="Suspend"
@@ -216,7 +229,7 @@ export default function Options({ user }: OptionsProps) {
         <ConfirmationModal
           isOpen={showSuspendModal}
           onClose={() => setShowSuspendModal(false)}
-          onConfirm={() => handleSuspendUser(user.subscriptions!.status)}
+          onConfirm={() => handleSuspendUser(user.subscriptions?.status ?? 'ACTIVE')}
           title="Reactivate User"
           description={`Are you sure you want to reactivate ${user.fullName}'s account? This action can be reversed later.`}
           confirmText="Reactivate"

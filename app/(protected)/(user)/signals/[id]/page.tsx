@@ -6,8 +6,10 @@ import {
   AlertTriangle,
   ChevronLeft,
   Copy,
+  Crown,
   DollarSign,
   FileText,
+  Lock,
   Target,
   Zap,
 } from 'lucide-react';
@@ -19,16 +21,17 @@ import { Badge } from '@/components/ui/badge';
 import { CopyButton } from '@/components/copy-button';
 import { cn } from '@/lib/utils';
 import { getSession } from '@/lib/auth-utils';
+import { isVipUser } from '@/actions/signals';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-async function getSignal(id: string): Promise<SignalWithTargets | 'unauthorized' | null> {
+async function getSignal(id: string): Promise<SignalWithTargets & { accessDenied?: boolean } | 'unauthorized' | null> {
   const session = await getSession();
   if (!session) return 'unauthorized';
 
   try {
-    return await prisma.signal.findUnique({
+    const signal = await prisma.signal.findUnique({
       where: { id },
       include: {
         targets: {
@@ -43,6 +46,21 @@ async function getSignal(id: string): Promise<SignalWithTargets | 'unauthorized'
         },
       },
     });
+
+    if (!signal) return null;
+
+    // Check VIP access
+    if (signal.isVip) {
+      const isAdmin = session.role === 'ADMIN' || session.role === 'PRIVATE';
+      if (!isAdmin) {
+        const vip = await isVipUser(session.id as string);
+        if (!vip) {
+          return { ...signal, accessDenied: true };
+        }
+      }
+    }
+
+    return signal;
   } catch (error) {
     console.error('[SignalPage] Failed to fetch signal:', id, error);
     return null;
@@ -54,6 +72,40 @@ export default async function SignalPage({ params }: { params: Promise<{ id: str
   const signal = await getSignal(id);
   if (signal === 'unauthorized') redirect('/login');
   if (!signal) notFound();
+
+  // VIP signal access denied — show locked page
+  if ((signal as any).accessDenied) {
+    return (
+      <div className="container mx-auto max-w-[600px] py-24 px-8 flex flex-col items-center gap-6 text-center">
+        <div className="h-16 w-16 rounded-2xl dark:bg-amber-500/10 bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+          <Lock className="h-7 w-7 text-amber-400" />
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-widest">
+          <Crown className="h-3 w-3" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold text-foreground">VIP Access Required</h1>
+          <p className="text-muted-foreground/60 text-sm leading-relaxed max-w-sm">
+            This signal is exclusive to VIP members. Upgrade your plan to unlock full access to all VIP signals.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link
+            href="/upgrade"
+            className="inline-flex items-center gap-2 h-10 px-6 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm font-bold hover:bg-amber-500/20 transition-colors"
+          >
+            <Crown className="h-4 w-4" /> Upgrade to VIP
+          </Link>
+          <Link
+            href="/signals"
+            className="inline-flex items-center gap-2 h-10 px-6 rounded-xl border border-border/60 text-muted-foreground text-sm hover:bg-muted/30 transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" /> Back to Signals
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   // swap logic is handled inside <SwapWidget>
 

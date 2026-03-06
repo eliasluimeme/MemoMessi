@@ -1,13 +1,17 @@
-import { getAllSignals } from '@/actions/signals';
+import { getAllSignals, isVipUser } from '@/actions/signals';
+import { getSession } from '@/lib/auth-utils';
 import { Activity } from 'lucide-react';
 import { MotionContainer, MotionItem } from '@/components/motion-container';
 import { ContentView } from '@/components/signal/signals-list';
+import { FreeTierBanner } from '@/components/free-tier-banner';
 
 export default async function SignalsPage() {
-  const signals = await getAllSignals();
+  const [signals, session] = await Promise.all([getAllSignals(), getSession()]);
+  const isAdmin = session?.role === 'ADMIN' || session?.role === 'PRIVATE';
+  const vip = isAdmin || (session?.id ? await isVipUser(session.id as string) : false);
 
   return (
-    <div className="container mx-auto py-12 px-6 md:px-12 max-w-[1400px]">
+    <div className="container mx-auto py-2 px-6 md:px-12 max-w-[1400px]">
       <MotionContainer className="space-y-12">
         <MotionItem className="flex flex-col md:flex-row md:items-end justify-between gap-8 pb-12 border-b border-border/40">
           <div className="space-y-4 max-w-xl">
@@ -23,6 +27,12 @@ export default async function SignalsPage() {
             </p>
           </div>
         </MotionItem>
+
+        {!vip && (
+          <MotionItem>
+            <FreeTierBanner />
+          </MotionItem>
+        )}
 
         <MotionItem>
           <ContentView signals={signals} />

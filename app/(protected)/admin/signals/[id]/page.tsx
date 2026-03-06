@@ -70,7 +70,7 @@ export default async function SignalPage({ params }: { params: Promise<{ id: str
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex items-center gap-5">
-              <TokenImage token={base} className="h-16 w-16 rounded-2xl flex-shrink-0" />
+              <TokenImage token={base} network={signal.network} contractAddress={signal.contractAddress} className="h-16 w-16 rounded-2xl flex-shrink-0" />
               <div className="space-y-2">
                 <div className="flex items-center gap-3 flex-wrap">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] uppercase tracking-widest font-semibold border border-emerald-500/20">
