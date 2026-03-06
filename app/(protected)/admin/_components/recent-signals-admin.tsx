@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { Zap, Clock, TrendingUp, TrendingDown } from 'lucide-react';
+import { Zap, Clock, TrendingUp, TrendingDown, Crown } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { TokenImage } from '@/components/token-image';
 import { cn } from '@/lib/utils';
@@ -76,9 +76,19 @@ export async function RecentSignalsAdmin() {
 
             return (
               <Link key={signal.id} href={`/admin/signals/${signal.id}`} className="group block h-[220px]">
-                <div className="relative h-full flex flex-col rounded-[20px] border border-border/50 bg-card/50 backdrop-blur-xl p-5 transition-all duration-300 hover:border-border hover:-translate-y-0.5 hover:bg-card/70 overflow-hidden">
+                <div className={cn(
+                  'relative h-full flex flex-col rounded-[20px] backdrop-blur-xl p-5 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden border',
+                  signal.isVip
+                    ? 'border-amber-500/30 bg-amber-500/[0.04] hover:border-amber-500/50 shadow-[0_0_20px_rgba(245,158,11,0.07)]'
+                    : 'border-border/50 bg-card/50 hover:border-border hover:bg-card/70'
+                )}>
+                  {/* Amber accent line for VIP */}
+                  {signal.isVip && (
+                    <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
+                  )}
+
                   {/* Glow accent */}
-                  {signal.status !== 'CLOSED' && (
+                  {signal.status !== 'CLOSED' && !signal.isVip && (
                     <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
                   )}
 
@@ -95,12 +105,19 @@ export async function RecentSignalsAdmin() {
                       </p>
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                      {isBuy
-                        ? <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                        : <TrendingDown className="h-3.5 w-3.5 text-rose-400" />}
-                      <span className={cn('text-[10px] font-bold', isBuy ? 'text-emerald-400' : 'text-rose-400')}>
-                        {isBuy ? 'LONG' : 'SHORT'}
-                      </span>
+                      {signal.isVip && (
+                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-extrabold uppercase tracking-wider shadow-[0_0_8px_rgba(245,158,11,0.1)]">
+                          <Crown className="h-2.5 w-2.5" /> VIP
+                        </div>
+                      )}
+                      <div className={cn('flex items-center gap-1', isBuy ? 'text-emerald-400' : 'text-rose-400')}>
+                        {isBuy
+                          ? <TrendingUp className="h-3.5 w-3.5" />
+                          : <TrendingDown className="h-3.5 w-3.5" />}
+                        <span className="text-[10px] font-bold">
+                          {isBuy ? 'LONG' : 'SHORT'}
+                        </span>
+                      </div>
                     </div>
                   </div>
 

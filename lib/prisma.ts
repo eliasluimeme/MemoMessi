@@ -6,10 +6,19 @@ declare global {
 }
 
 function createPrismaClient() {
-  // Use DIRECT_URL (bypasses PgBouncer pooler) for reliable server-side queries.
-  // DIRECT_URL is a direct Neon compute connection — faster cold-starts, no pooler hang.
-  // DATABASE_URL (pooler) is only needed for migrations (handled by prisma.config.ts).
-  const url = process.env.DIRECT_URL || process.env.DATABASE_URL;
+  // Use DATABASE_URL (PgBouncer transaction-mode pooler) for all app queries.
+  // DIRECT_URL (non-pooled) is reserved for migrations via prisma.config.ts.
+  let url = process.env.DATABASE_URL || process.env.DIRECT_URL || '';
+
+  // Cap Prisma's internal connection pool to 1 so PgBouncer handles all
+  // multiplexing. Without this, Prisma opens (num_cpu × 2 + 1) connections by
+  // default — instantly exhausting Supabase session-mode pool_size when
+  // multiple async server components fire concurrently.
+  // pgbouncer=true disables prepared statements, required for transaction-mode pooler.
+  if (url && !url.includes('connection_limit')) {
+    url += (url.includes('?') ? '&' : '?') + 'connection_limit=1&pool_timeout=20&pgbouncer=true';
+  }
+
   return new PrismaClient({
     datasources: { db: { url } },
   });

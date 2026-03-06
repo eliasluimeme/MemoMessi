@@ -14,7 +14,9 @@ export async function CommandStats() {
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  const [pendingCount, signalsToday, urgentExpiring, degen24h] = await Promise.all([
+  // Batch all counts in a single transaction so they share one DB connection,
+  // preventing MaxClientsInSessionMode pool exhaustion.
+  const [pendingCount, signalsToday, urgentExpiring, degen24h] = await prisma.$transaction([
     prisma.subscription.count({ where: { status: 'PENDING' } }),
     prisma.signal.count({ where: { createdAt: { gte: startOfToday } } }),
     prisma.subscription.count({

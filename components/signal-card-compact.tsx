@@ -87,13 +87,15 @@ export default function SignalCardCompact({ signal }: { signal: SignalWithTarget
 
     return (
         <Link href={`/signals/${signal.id}`} className="group block h-full">
-            <div className="relative flex flex-col h-full rounded-2xl border border-border/60 dark:border-white/[0.06] bg-card/60 dark:bg-[#0a0a0a2d] backdrop-blur-xl p-5 gap-4 transition-all duration-300 hover:border-border dark:hover:border-white/[0.1] hover:-translate-y-0.5 overflow-hidden">
-
-                {/* VIP badge */}
+            <div className={cn(
+                'relative flex flex-col h-full rounded-2xl backdrop-blur-xl p-5 gap-4 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden border',
+                signal.isVip
+                    ? 'border-amber-500/25 dark:border-amber-500/20 bg-amber-500/[0.025] dark:bg-amber-500/[0.02] hover:border-amber-500/40 shadow-[0_0_24px_rgba(245,158,11,0.05)]'
+                    : 'border-border/60 dark:border-white/[0.06] bg-card/60 dark:bg-[#0a0a0a2d] hover:border-border dark:hover:border-white/[0.1]'
+            )}>
+                {/* Amber accent line for VIP signals */}
                 {signal.isVip && (
-                    <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-bold uppercase tracking-widest">
-                        <Crown className="h-2.5 w-2.5" /> VIP
-                    </div>
+                    <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
                 )}
 
                 {/* Header */}
@@ -107,12 +109,19 @@ export default function SignalCardCompact({ signal }: { signal: SignalWithTarget
                         <p className="text-[10px] text-muted-foreground/50 mt-0.5">{signal.network ?? 'Solana'} · {signal.market}</p>
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
-                        {isBuy
-                            ? <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                            : <TrendingDown className="h-3.5 w-3.5 text-rose-400" />}
-                        <span className={cn('text-[10px] font-bold', isBuy ? 'text-emerald-400' : 'text-rose-400')}>
-                            {isBuy ? 'LONG' : 'SHORT'}
-                        </span>
+                        {signal.isVip && (
+                            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[9px] font-extrabold uppercase tracking-wider shadow-[0_0_8px_rgba(245,158,11,0.1)]">
+                                <Crown className="h-2.5 w-2.5" /> VIP
+                            </div>
+                        )}
+                        <div className={cn('flex items-center gap-1', isBuy ? 'text-emerald-400' : 'text-rose-400')}>
+                            {isBuy
+                                ? <TrendingUp className="h-3.5 w-3.5" />
+                                : <TrendingDown className="h-3.5 w-3.5" />}
+                            <span className={cn('text-[10px] font-bold')}>
+                                {isBuy ? 'LONG' : 'SHORT'}
+                            </span>
+                        </div>
                     </div>
                 </div>
 
