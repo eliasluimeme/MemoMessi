@@ -48,11 +48,18 @@ export const GECKO_NETWORK: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function isSolanaNetwork(network?: string | null): boolean {
-  return network === 'solana';
+  return !!(network && network.toLowerCase() === 'solana');
+}
+
+export function isBSCNetwork(network?: string | null): boolean {
+  return !!(network && (network === 'bsc' || network === 'binance'));
 }
 
 export function isEVMNetwork(network?: string | null): boolean {
-  return !!network && network !== 'solana' && network !== 'binance';
+  if (!network) return false;
+  const n = network.toLowerCase();
+  // All non-Solana supported networks are EVM-compatible (including BSC)
+  return n !== 'solana' && !!EVM_CHAIN_IDS[n];
 }
 
 export function isMemeNetwork(network?: string | null): boolean {
@@ -67,7 +74,7 @@ export function isMemeNetwork(network?: string | null): boolean {
 
 export function getEVMChainId(network?: string | null): number | null {
   if (!network) return null;
-  return EVM_CHAIN_IDS[network] ?? null;
+  return EVM_CHAIN_IDS[network.toLowerCase()] ?? null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -120,7 +127,10 @@ export function getSwapLinks(
 ): SwapLink[] {
   if (!contractAddress) return [];
 
-  if (network === 'solana') {
+  const net = network?.toLowerCase();
+
+  // ── Solana ──────────────────────────────────────────────────────────────
+  if (net === 'solana') {
     return [
       {
         name: 'Jupiter',
@@ -145,20 +155,67 @@ export function getSwapLinks(
     ];
   }
 
-  const chainId = getEVMChainId(network);
+  // ── BSC / Binance Smart Chain ───────────────────────────────────────────
+  if (net === 'bsc' || net === 'binance') {
+    return [
+      {
+        name: 'PancakeSwap',
+        description: 'Leading BSC DEX',
+        url: `https://pancakeswap.finance/swap?inputCurrency=BNB&outputCurrency=${contractAddress}`,
+      },
+      {
+        name: 'Jumper (LI.FI)',
+        description: 'Multi-chain bridge & swap',
+        url: `https://jumper.exchange/?toChain=56&toToken=${contractAddress}`,
+      },
+      {
+        name: '1inch',
+        description: 'Best-rate DEX aggregator',
+        url: `https://app.1inch.io/#/56/simple/swap/BNB/${contractAddress}`,
+      },
+      {
+        name: 'DexScreener',
+        description: 'Charts & trade links',
+        url: `https://dexscreener.com/bsc/${contractAddress}`,
+      },
+    ];
+  }
+
+  const chainId = getEVMChainId(net);
   if (!chainId) return [];
 
-  // Uniswap uses "mainnet" for ETH, otherwise the network slug
-  const uniChain =
-    network === 'eth' || network === 'ethereum'
-      ? 'mainnet'
-      : network ?? 'base';
+  // ── Base ────────────────────────────────────────────────────────────────
+  if (net === 'base') {
+    return [
+      {
+        name: 'Uniswap',
+        description: 'Leading DEX on Base',
+        url: `https://app.uniswap.org/#/swap?outputCurrency=${contractAddress}&chain=base`,
+      },
+      {
+        name: 'Jumper (LI.FI)',
+        description: 'Multi-chain bridge & swap',
+        url: `https://jumper.exchange/?toChain=${chainId}&toToken=${contractAddress}`,
+      },
+      {
+        name: '1inch',
+        description: 'Best-rate DEX aggregator',
+        url: `https://app.1inch.io/#/${chainId}/simple/swap/ETH/${contractAddress}`,
+      },
+      {
+        name: 'DexScreener',
+        description: 'Charts & trade links',
+        url: `https://dexscreener.com/base/${contractAddress}`,
+      },
+    ];
+  }
 
+  // ── Ethereum ────────────────────────────────────────────────────────────
   return [
     {
       name: 'Uniswap',
-      description: 'Leading EVM DEX aggregator',
-      url: `https://app.uniswap.org/#/swap?outputCurrency=${contractAddress}&chain=${uniChain}`,
+      description: 'Leading Ethereum DEX',
+      url: `https://app.uniswap.org/#/swap?outputCurrency=${contractAddress}&chain=mainnet`,
     },
     {
       name: 'Jumper (LI.FI)',
@@ -173,7 +230,7 @@ export function getSwapLinks(
     {
       name: 'DexScreener',
       description: 'Charts & trade links',
-      url: `https://dexscreener.com/${DEXSCREENER_NETWORK[network!] ?? network}/${contractAddress}`,
+      url: `https://dexscreener.com/ethereum/${contractAddress}`,
     },
   ];
 }

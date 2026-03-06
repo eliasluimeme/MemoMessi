@@ -20,6 +20,7 @@ const PLATFORM_COLORS: Record<string, string> = {
   Jupiter:          'hover:border-[#17D896]/30 hover:text-[#17D896]',
   Raydium:          'hover:border-purple-500/30 hover:text-purple-400',
   Orca:             'hover:border-sky-500/30 hover:text-sky-400',
+  PancakeSwap:      'hover:border-yellow-500/30 hover:text-yellow-400',
   Uniswap:          'hover:border-pink-500/30 hover:text-pink-400',
   'Jumper (LI.FI)': 'hover:border-violet-500/30 hover:text-violet-400',
   '1inch':          'hover:border-red-500/30 hover:text-red-400',
