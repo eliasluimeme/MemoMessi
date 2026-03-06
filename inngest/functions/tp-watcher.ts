@@ -38,6 +38,16 @@ function formatTelegramMessage(
   );
 }
 
+function formatStopLossMessage(pair: string, price: number, loss: number): string {
+  const lossStr = loss >= 0 ? `+${loss.toFixed(2)}%` : `${loss.toFixed(2)}%`;
+  return (
+    `🛑 <b>Stop Loss Hit!</b>\n\n` +
+    `Pair: <b>${pair}</b>\n` +
+    `Stop Loss: <b>$${price.toLocaleString(undefined, { maximumSignificantDigits: 6 })}</b>\n` +
+    `Loss: <b>${lossStr}</b>`
+  );
+}
+
 // ─── scheduled function ───────────────────────────────────────────────────────
 
 export const tpWatcher = inngest.createFunction(
@@ -65,26 +75,30 @@ export const tpWatcher = inngest.createFunction(
       });
     });
 
-    const active = signals.filter((s) => s.targets.length > 0);
-    logger.info(`[tp-watcher] active signals: ${active.length}`);
+    // Signals with unhit targets (TP candidates) + signals with a stop loss
+    const tpSignals = signals.filter((s) => s.targets.length > 0);
+    const slSignals = signals.filter((s) => s.stopLoss != null);
 
-    if (!active.length) return { checked: 0 };
+    // Deduplicated union — we need prices for both sets
+    const priceSignals = [
+      ...new Map([...tpSignals, ...slSignals].map((s) => [s.id, s])).values(),
+    ];
+
+    logger.info(
+      `[tp-watcher] TP candidates: ${tpSignals.length}, SL candidates: ${slSignals.length}`,
+    );
+
+    if (!priceSignals.length) return { checked: 0 };
 
     // ── Step 2: bulk-fetch prices ────────────────────────────────────────────
-    const binanceSignals = active.filter(
-      (s) => !s.network || s.network === 'binance',
-    );
-    const solanaSignals = active.filter(
-      (s) => s.network === 'solana' && !!s.contractAddress,
-    );
-
     const [binancePrices, dexPrices] = await step.run(
       'fetch-prices',
       async () => {
-        const binanceSymbols = binanceSignals.map((s) =>
-          s.pair.replace('/', '').toUpperCase(),
-        );
-        const solanaAddresses = solanaSignals
+        const binanceSymbols = priceSignals
+          .filter((s) => !s.network || s.network === 'binance')
+          .map((s) => s.pair.replace('/', '').toUpperCase());
+        const solanaAddresses = priceSignals
+          .filter((s) => s.network === 'solana' && !!s.contractAddress)
           .map((s) => s.contractAddress!)
           .filter(Boolean);
 
@@ -101,17 +115,17 @@ export const tpWatcher = inngest.createFunction(
       },
     );
 
-    // ── Step 3: evaluate & persist TP hits ───────────────────────────────────
-    const notifications: { pair: string; tpNumber: number; price: number; gain: number }[] =
-      [];
+    // ── Step 3: evaluate & persist TP + SL hits ──────────────────────────────
+    type TpNotif = { type: 'tp'; pair: string; tpNumber: number; price: number; gain: number };
+    type SlNotif = { type: 'sl'; pair: string; price: number; loss: number };
+    const notifications: (TpNotif | SlNotif)[] = [];
 
     await step.run('evaluate-and-persist', async () => {
-      for (const signal of active) {
+      for (const signal of priceSignals) {
         let currentPrice: number | undefined;
 
         if (!signal.network || signal.network === 'binance') {
-          const sym = signal.pair.replace('/', '').toUpperCase();
-          currentPrice = binancePrices[sym];
+          currentPrice = binancePrices[signal.pair.replace('/', '').toUpperCase()];
         } else if (signal.network === 'solana' && signal.contractAddress) {
           currentPrice = dexPrices[signal.contractAddress.toLowerCase()];
         }
@@ -119,47 +133,81 @@ export const tpWatcher = inngest.createFunction(
         if (!currentPrice || !isFinite(currentPrice)) continue;
 
         const now = new Date();
-        const newlyHitTargets = signal.targets.filter(
-          (t) => !t.hit && currentPrice! >= t.price,
-        );
+        let closedByTP = false;
 
-        if (!newlyHitTargets.length) continue;
+        // ── TP evaluation ──────────────────────────────────────────────────
+        if (signal.targets.length > 0) {
+          const newlyHitTargets = signal.targets.filter(
+            (t) => !t.hit && currentPrice! >= t.price,
+          );
 
-        // Persist all newly hit targets in one shot
-        await prisma.$transaction(
-          newlyHitTargets.map((t) =>
-            prisma.target.update({
-              where: { id: t.id },
-              data: { hit: true, hitAt: now },
-            }),
-          ),
-        );
+          if (newlyHitTargets.length > 0) {
+            // Persist all newly hit targets in one shot
+            await prisma.$transaction(
+              newlyHitTargets.map((t) =>
+                prisma.target.update({
+                  where: { id: t.id },
+                  data: { hit: true, hitAt: now },
+                }),
+              ),
+            );
 
-        // Check if ALL targets (including previously hit) are now done
-        const allTargets = await prisma.target.findMany({
-          where: { signalId: signal.id },
-        });
-        const allHit = allTargets.every((t) => t.hit);
-        const maxHitNumber = Math.max(
-          ...allTargets.filter((t) => t.hit).map((t) => t.number),
-        );
+            // Check if ALL targets (including previously hit) are now done
+            const allTargets = await prisma.target.findMany({
+              where: { signalId: signal.id },
+            });
+            const allHit = allTargets.every((t) => t.hit);
+            const maxHitNumber = Math.max(
+              ...allTargets.filter((t) => t.hit).map((t) => t.number),
+            );
 
-        await prisma.signal.update({
-          where: { id: signal.id },
-          data: {
-            status: allHit ? Status.CLOSED : tpNumberToStatus(maxHitNumber),
-            ...(allHit ? { isClosed: true, closedAt: now } : {}),
-          },
-        });
+            await prisma.signal.update({
+              where: { id: signal.id },
+              data: {
+                status: allHit ? Status.CLOSED : tpNumberToStatus(maxHitNumber),
+                ...(allHit ? { isClosed: true, closedAt: now } : {}),
+              },
+            });
 
-        // Queue notifications for each newly hit target
-        for (const t of newlyHitTargets) {
-          notifications.push({
-            pair: signal.pair,
-            tpNumber: t.number,
-            price: t.price,
-            gain: t.gain,
-          });
+            closedByTP = allHit;
+
+            for (const t of newlyHitTargets) {
+              notifications.push({
+                type: 'tp',
+                pair: signal.pair,
+                tpNumber: t.number,
+                price: t.price,
+                gain: t.gain,
+              });
+            }
+          }
+        }
+
+        // ── SL evaluation (skip if signal was just closed by hitting all TPs) ─
+        if (!closedByTP && signal.stopLoss != null) {
+          // BUY: SL hit when price drops to or below stop loss
+          // SELL: SL hit when price rises to or above stop loss
+          const slHit =
+            signal.action === 'SELL'
+              ? currentPrice >= signal.stopLoss
+              : currentPrice <= signal.stopLoss;
+
+          if (slHit) {
+            const loss =
+              ((currentPrice - signal.entryZone) / signal.entryZone) * 100;
+
+            await prisma.signal.update({
+              where: { id: signal.id },
+              data: { isClosed: true, closedAt: now, status: Status.CLOSED },
+            });
+
+            notifications.push({
+              type: 'sl',
+              pair: signal.pair,
+              price: signal.stopLoss,
+              loss,
+            });
+          }
         }
       }
     });
@@ -168,14 +216,17 @@ export const tpWatcher = inngest.createFunction(
     if (notifications.length > 0) {
       await step.run('send-telegram-notifications', async () => {
         for (const n of notifications) {
-          const message = formatTelegramMessage(n.pair, n.tpNumber, n.price, n.gain);
+          const message =
+            n.type === 'tp'
+              ? formatTelegramMessage(n.pair, n.tpNumber, n.price, n.gain)
+              : formatStopLossMessage(n.pair, n.price, n.loss);
           await telegramService.sendToSubscribers(message);
         }
       });
     }
 
     return {
-      checked: active.length,
+      checked: priceSignals.length,
       notified: notifications.length,
       at: new Date().toISOString(),
     };
